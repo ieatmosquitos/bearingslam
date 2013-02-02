@@ -10,7 +10,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <list>
 #include <vector>
-#include "tools.cpp"
+#include "tools.h"
 
 class LandmarksDrawer{
 	int smaller_x;
