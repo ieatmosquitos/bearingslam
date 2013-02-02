@@ -1,0 +1,5 @@
+*.*~
+/build/
+/poses_and_landmarks/
+/trajectories
+/maps
