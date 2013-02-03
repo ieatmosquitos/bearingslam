@@ -76,10 +76,12 @@ void Landmark::confirm(){
 	this->confirmed = true;
 }
 
-void Landmark::checkConfirmed(int needed){
+bool Landmark::checkConfirmed(int needed){
 	if(this->observations.size() > needed){
 		this->confirm();
+		return true;
 	}
+	return false;
 }
 
 bool Landmark::isConfirmed(){
@@ -241,6 +243,15 @@ static Eigen::Matrix3d v2t(Eigen::Vector3d v){
   ret <<
     cos(v[2]),	-sin(v[2]),	v[0],
     sin(v[2]),	cos(v[2]),	v[1],
+    0,		0,		1;
+  return ret;
+}
+
+static Eigen::Matrix3d r2t(RobotPosition * r){
+  Eigen::Matrix3d ret;
+  ret <<
+    cos(r->theta()),	-sin(r->theta()),	r->x(),
+    sin(r->theta()),	cos(r->theta()),	r->y(),
     0,		0,		1;
   return ret;
 }

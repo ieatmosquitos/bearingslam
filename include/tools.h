@@ -74,7 +74,7 @@ class Landmark : public g2o::VertexPointXY, public id_checkable{
   Eigen::Vector2d * getPosition();
   void getPosition(double * pos);	// puts in pos the position of the Landmark
   void confirm(); // sets the landmark as confirmed
-  void checkConfirmed(int needed);	// checks whether the landmark has at least 'needed' observations, and in the case sets it to confirmed
+  bool checkConfirmed(int needed);	// checks whether the landmark has at least 'needed' observations, and in the case sets it to confirmed and return TRUE, else return FALSE.
   std::vector<Observation*> * getObservations();	// returns a pointer to the observations vector
   bool isConfirmed();
   unsigned int obsnum;	// redundant counter of the number of observations

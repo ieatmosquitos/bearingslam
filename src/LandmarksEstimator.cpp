@@ -25,7 +25,7 @@
 // configs for the first algorithm
 #define GENERAL_ANGLE_TOLERANCE	0.2	// this affects the association of a new observation to the previously generated landmarks
 #define BEAR_ONLY_ANGLE_TOLERANCE	GENERAL_ANGLE_TOLERANCE/2	//	this affects associations of landmark that still have only one observation
-#define SECOND_ANGLE_MIN_DISTANCE	1*GENERAL_ANGLE_TOLERANCE	//	this tells the minimum angle needed for the second closer angle in order not to be considered ambiguous
+#define SECOND_ANGLE_MIN_DISTANCE	1*GENERAL_ANGLE_TOLERANCE	//	this tells the minimum angle needed for the second closer angle  in order not to be considered ambiguous
 
 // configs for the second algorithm
 #define DISTANCE_TOLERANCE 0.2	//	maybe this should be a global variable, that is set up according to the dimension of the space explored by the robot poses
@@ -33,12 +33,25 @@
 // configs for both algorithms
 #define CONFIRM_OBS	10	//	minimum number of consecutive observations needed for the landmark to be confirmed
 
+#define OPTIMIZE_EVERY 50	// every time this number of step has been performed, an optimization phase begins
+
 // usefull variables
-bool next_step; // when true, the algorithm analyses next step
+bool next_step; 	// when true, the algorithm analyses next step
 bool next_optim;	// when true, an optimization step is performed
 rdrawer::RobotDrawer * _drawer;	// used for drawing on the screen
-
+std::vector<RobotPosition*> * transformations;  // transformations from a step to the next one
+unsigned int next_id;
 RobotPosition * last_robot_pose;
+Eigen::Matrix3d * odom_info;
+Eigen::MatrixXd * obs_info;
+
+
+// types definition
+typedef g2o::BlockSolver< g2o::BlockSolverTraits<-1, -1> >  SlamBlockSolver;
+typedef g2o::LinearSolverCSparse<SlamBlockSolver::PoseMatrixType> SlamLinearSolver;
+
+// optimizer declaration
+g2o::SparseOptimizer * optimizer;
 
 void handleEvents(sf::RenderWindow * window){
   sf::Event event;
@@ -96,10 +109,10 @@ RobotPosition * concatenate(RobotPosition * step, Eigen::Matrix3d& transf){
   return ret;
 }
 
-void tryToUnderstand1(RobotPosition * pose, std::list<Landmark *>* landmarks,std::vector<Landmark *> *  last_observations, std::vector<Landmark *> *  propagate_observations){
+void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,std::vector<Landmark *> *  last_observations, std::vector<Landmark *> *  propagate_observations){
   double rpose[3];
   pose->getEstimateData(rpose);
-
+  
   propagate_observations->clear();
   
   std::cout << "Robot Position:\t" << rpose[0] << "\t" << rpose[1] << "\t" << rpose[2] << "\n";
@@ -319,30 +332,138 @@ void printState(std::list<Landmark*> * landmarks, RobotPosition * pose, rdrawer:
   _drawer->setRobotPose(*drawer_robot_pose);
 }
 
-// void printGraph(g2o::SparseOptimizer * optimizer){
+void init(){
+  std::cout << "Initializing stuff" << std::endl;
   
-// }
+  next_id = 0;
+  
+  odom_info = new Eigen::Matrix3d();
+  (*odom_info) <<	500,	0,	0,
+    			0,	500,	0,
+    			0,	0,	100;
+
+  obs_info = new Eigen::MatrixXd(1,1);
+  (*obs_info) <<	500;
+  
+  
+  // allocating the optimizer
+  optimizer = new g2o::SparseOptimizer();
+  SlamLinearSolver* linearSolver = new SlamLinearSolver();
+  linearSolver->setBlockOrdering(false);
+  SlamBlockSolver* blockSolver = new SlamBlockSolver(linearSolver);
+  g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton(blockSolver);
+  
+  optimizer->setAlgorithm(solver);
+  optimizer->setVerbose(true);
+  
+}
+
+void populateGraph(std::vector<RobotPosition *> * poses, std::list<Landmark *> * landmarks){
+  std::cout << "clearing optimizer..." << std::endl;
+  // optimizer->clear();
+  
+  // put poses in the graph
+  for(unsigned int i=0; i<poses->size(); i++){
+    std::cout << "adding pose " << i;
+    // add this pose to the graph
+    optimizer->addVertex((*poses)[i]);
+    std::cout << "...done." << std::endl;
+    
+    if(i>0){
+      // add the constraint regarding the rototranslation performed from the previous step
+      g2o::EdgeSE2 * odom_edge = new g2o::EdgeSE2;
+      odom_edge->vertices()[0] = (*poses)[i-1];
+      odom_edge->vertices()[1] = (*poses)[i];
+      std::cout << "accessing transformations informations" << std::endl;
+      g2o::SE2 * measurement = new g2o::SE2((*transformations)[i]->x(), (*transformations)[i]->y(), (*transformations)[i]->theta());
+      odom_edge->setMeasurement(*measurement);
+      odom_edge->setInformation(*odom_info);
+      optimizer->addEdge(odom_edge);
+    }
+  }
+  
+  // put landmarks in the graph
+  std::list<Landmark *>::iterator iter;
+  for(iter = landmarks->begin(); iter!=landmarks->end(); iter++){
+    
+    Landmark * lm = *iter;
+    
+    std::cout << "if(!lm->isConfirmed())..." << std::endl;
+    if(!lm->isConfirmed()){
+      continue;
+    }
+    
+    if(!lm->hasId()){
+      lm->setId(next_id++);
+      lm->idAssigned();
+    }
+    
+    optimizer->addVertex(lm);
+    
+    for(unsigned int o=0; o<lm->getObservations()->size(); o++){
+      Observation * observation= (*(lm->getObservations()))[o];
+      RobotPosition * pose = observation->pose;
+      
+      g2o::EdgeSE2PointXYBearing* obs_edge =  new g2o::EdgeSE2PointXYBearing;
+      obs_edge->vertices()[0] = pose;
+      obs_edge->vertices()[1] = lm;
+      obs_edge->setMeasurementData(&(observation->bearing));
+      obs_edge->setInformation(*obs_info);
+      
+      optimizer->addEdge(obs_edge);
+    }
+  }
+  
+  optimizer->vertex(0)->setFixed(true);
+  optimizer->initializeOptimization();
+}
+
+// delete unconfirmed landmarks from the given landmarks list. buffer is used as a buffer and its contents are cleared.
+void deleteUnconfirmedLandmarks(std::list<Landmark *> * landmarks, std::vector<Landmark *> * buffer){
+  
+  buffer->clear();
+  std::list<Landmark *>::iterator iter;
+  for(iter = landmarks->begin(); iter!=landmarks->end(); iter++){
+    Landmark * lm = *iter;
+    
+    if(lm->isConfirmed()){
+      buffer->push_back(lm);
+    }
+  }
+  
+  landmarks->clear();
+  
+  for(unsigned int i=0; i<buffer->size(); i++){
+    landmarks->push_back((*buffer)[i]);
+  }
+  buffer->clear();
+}
 
 int main(int argc, char** argv){
+  std::cout << "LANDMARK ESTIMATOR" << std::endl;
+  std::cout << "==================" << std::endl;
+  
   // check the input
   if(argc < 2){
     std::cout << "Usage: LadmarksEstimator <traj_file>\n";
     exit(0);
   }
   
+  init();
+  
   // create structures for storing datas
-  std::vector<RobotPosition*> poses;  // absolute poses 
-  std::vector<RobotPosition*> transformations;  // transformations from a step to the next one
+  std::vector<RobotPosition*> poses;  // absolute poses
+  transformations = new std::vector<RobotPosition *>;
   std::vector<Landmark *> landmarks;	// this will contain, at the end, all the confirmed landmarks
   std::list<Landmark *> tmp_landmarks;	// this is a buffer
   
   // add the first node
-  transformations.push_back(new RobotPosition(0,0,0));
+  transformations->push_back(new RobotPosition(0,0,0));
   
   // load other nodes from file
-  readTrajFromFile(std::string(argv[1]), &transformations);
+  readTrajFromFile(std::string(argv[1]), transformations);
   
-  if(transformations.size() < 1){
+  if(transformations->size() < 1){
     std::cout << "no infos loaded... quitting" << std::endl;
     exit(0);
   }
@@ -353,20 +474,6 @@ int main(int argc, char** argv){
   
   _drawer = new rdrawer::RobotDrawer();
   rdrawer::RobotPose drawer_robot_pose;
-  
-  // using namespace g2o;
-  typedef g2o::BlockSolver< g2o::BlockSolverTraits<-1, -1> >  SlamBlockSolver;
-  typedef g2o::LinearSolverCSparse<SlamBlockSolver::PoseMatrixType> SlamLinearSolver;
-  
-  // allocating the optimizer
-  g2o::SparseOptimizer optimizer;
-  SlamLinearSolver* linearSolver = new SlamLinearSolver();
-  linearSolver->setBlockOrdering(false);
-  SlamBlockSolver* blockSolver = new SlamBlockSolver(linearSolver);
-  g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton(blockSolver);
-  
-  optimizer.setAlgorithm(solver);
-  
 
   //<<<<<<<<<<<BEGIN OF ALGORITHM 1 LAUNCHER
   std::vector<Landmark *> buff1;
@@ -376,14 +483,24 @@ int main(int argc, char** argv){
   buff_transf <<	1, 0, 0,
     			0, 1, 0,
     			0, 0, 1;
-  for (unsigned int i=0; i<transformations.size(); i++){
+  
+  unsigned int loop_iterations = 0;
+  
+  for (unsigned int i=0; i<transformations->size(); i++){
     
+    loop_iterations ++;
     next_step = false;
     
-    // add the new pose
-    poses.push_back(concatenate(transformations[i], buff_transf));
-    
+    // add the new pose to the vector
+    if(i!=0){
+      buff_transf = r2t(poses[i-1]);
+    }
+    poses.push_back(concatenate((*transformations)[i], buff_transf));
     last_robot_pose = poses[i];
+    
+    // to assign an ID
+    poses[i]->setId(next_id++);
+    poses[i]->idAssigned();
     
     std::cout << "\nstep " << i+1 << "\n";
     if(buffswitch){
@@ -393,9 +510,22 @@ int main(int argc, char** argv){
       tryToUnderstand1(poses[i], &tmp_landmarks, &buff2, &buff1);
     }
     buffswitch = !buffswitch;
+    
+    if(loop_iterations > OPTIMIZE_EVERY){	// time to optimize
+      std::cout << "time to optimize" << std::endl;
+      loop_iterations = 0;
+      buff1.clear();
+      buff2.clear();
+      deleteUnconfirmedLandmarks(&tmp_landmarks, &buff1);
+      
+      populateGraph(&poses, &tmp_landmarks);
+      
+      optimizer->optimize(10);
+    }
+    
     std::cout << "creating image...\n";
     printState(&tmp_landmarks, poses[i], &drawer_robot_pose);
-		
+    
     std::cout << "displaying image...\n";
     while(!next_step){
       handleEvents(_drawer->getWindow());
@@ -407,115 +537,23 @@ int main(int argc, char** argv){
 
     // cvWaitKey(0);
   }
-  //>>>>>>>>>>>END OF ALGORITHM 1 LAUNCHER
-
-  // should now remove the landmarks that still have been seen fewer than CONFIRM_OBS times
-  std::cout << "algorithm finished, purging the landmarks list (CONFIRM_OBS is " << CONFIRM_OBS << ")\n";
-  std::list<Landmark *>::iterator iter;
-  for(iter = tmp_landmarks.begin(); iter!=tmp_landmarks.end(); iter++){
-    Landmark * lm = *iter;
-    std::cout << "landmark in:\t" << lm->x() << "\t"<< lm->y() <<" has " << lm->obsnum << " observations, ";
-    if(lm->obsnum >= CONFIRM_OBS){
-      std::cout << "CONFIRMED\n";
-      landmarks.push_back(lm);
-    }
-    else{
-      std::cout << "IGNORED\n";
-    }
-  }
-
-  // at this point, 'landmarks' will contain the landmarks estimated positions
-  std::cout << "\nlandmarks at:\n";
-  std::list<Landmark *>::iterator it;
-  for(unsigned int i=0; i< landmarks.size(); i++){
-    Landmark * lm = landmarks[i];
-    double pos[2];
-    lm->getPosition(pos);
-    double x = floorf((pos[0] * 1000) + 0.5)/1000;
-    double y = floorf((pos[1] * 1000) + 0.5)/1000;
-    std::cout << x << "  " << y << "\n";
-  }
   
-  // generate output g2o file
-  std::cout << "generating output file for g2o" << std::endl;
-  unsigned int next_id = 0;
-  // generate poses nodes and edges between them
-  // g2oout << "VERTEX_SE2 " << next_id++ << " 0 0 0" << std::endl;	// very first position
-  for(unsigned int i=0; i<poses.size(); i++){
-    RobotPosition * pose = poses[i];
-    RobotPosition * transf = transformations[i];
-    RobotPosition * prev_pose;
-    // unsigned int prev_id;
-    
-    if(!pose->hasId()){
-      pose->setId(next_id++);
-      pose->idAssigned();
-    }
-    
-    g2oout << "VERTEX_SE2 " << pose->id() << " " << pose->x() << " " << pose->y() << " " << pose->theta() << std::endl;
-    optimizer.addVertex(pose);
-    
-    if(i>0){
-      prev_pose = poses[i-1];
-      g2oout << "EDGE_SE2 " << prev_pose->id() << " " << pose->id() << " " << transf->x() << " " << transf->y() << " " << transf->theta() << " 500 0 0 500 0 100" << std::endl;
-      
-      g2o::EdgeSE2 * odom_edge = new g2o::EdgeSE2;
-      odom_edge->vertices()[0] = prev_pose;
-      odom_edge->vertices()[1] = pose;
-      g2o::SE2 * measurement = new g2o::SE2(transformations[i]->x(), transformations[i]->y(), transformations[i]->theta());
-      odom_edge->setMeasurement(*measurement);
-      Eigen::Matrix3d * info = new Eigen::Matrix3d();
-      (*info) <<	500,	0,	0,
-			0,	500,	0,
-			0,	0,	100;
-      odom_edge->setInformation(*info);
-      optimizer.addEdge(odom_edge);
-    }
-  }
-  // generate landmarks nodes and edges towards them from the poses where they were seen from
-  for(unsigned int l=0; l < landmarks.size(); l++){
-    Landmark * lmark = landmarks[l];
-    if(!lmark->hasId()){
-      lmark->setId(next_id++);
-      lmark->idAssigned();
-    }
-    // add the landmark
-    g2oout << "VERTEX_XY " << lmark->id() << " " << lmark->x() << " " << lmark->y() << std::endl;
-    optimizer.addVertex(lmark);
-    
-    // add the associated bearing constraints
-    for(unsigned int o=0; o<lmark->getObservations()->size(); o++){
-      Observation * observation= (*(lmark->getObservations()))[o];
-      RobotPosition * pose = observation->pose;
-      
-      g2oout << "EDGE_BEARING_SE2_XY " << pose->id() << " " << lmark->id() << " " << observation->bearing << " 200" << std::endl;
-      
-      g2o::EdgeSE2PointXYBearing* obs_edge =  new g2o::EdgeSE2PointXYBearing;
-      obs_edge->vertices()[0] = pose;
-      obs_edge->vertices()[1] = lmark;
-      obs_edge->setMeasurementData(&(observation->bearing));
-      Eigen::MatrixXd * info = new Eigen::MatrixXd(1,1);
-      (*info) <<	500;
-      obs_edge->setInformation(*info);
-      optimizer.addEdge(obs_edge);
-    }
-  }
+  buff1.clear();
+  buff2.clear();
+  deleteUnconfirmedLandmarks(&tmp_landmarks, &buff1);
   
-  optimizer.save("graph_before.g2o");
+  populateGraph(&poses, &tmp_landmarks);
+  optimizer->optimize(10);
   
-  std::cout << "program terminated! You can now optimize (o) or exit (esc)" << std::endl;
   
-  optimizer.vertex(0)->setFixed(true);
-  optimizer.setVerbose(true);
-  optimizer.initializeOptimization();
-  
+  std::cout << "program terminated! You can now keep optimizing optimize (o) or exit (esc)" << std::endl;
   next_optim = false;
   while(true)	// exit is performed inside handleEvents method
   {
     if(next_optim){
       next_optim = false;
-      optimizer.optimize(100);
-      // optimizer.save("graph_after.g2o");
+      optimizer->optimize(10);
+      // optimizer->save("graph_after.g2o");
     }
     printState(&tmp_landmarks, last_robot_pose, &drawer_robot_pose);
     while(!next_optim){
@@ -526,6 +564,113 @@ int main(int argc, char** argv){
     _drawer->clearAndDeleteLandmarks();
     _drawer->clearAndDeleteUnconfirmedLandmarks();
   }
+  
+  //>>>>>>>>>>>END OF ALGORITHM 1 LAUNCHER
+
+  // // should now remove the landmarks that still have been seen fewer than CONFIRM_OBS times
+  // std::cout << "algorithm finished, purging the landmarks list (CONFIRM_OBS is " << CONFIRM_OBS << ")\n";
+  // std::list<Landmark *>::iterator iter;
+  // for(iter = tmp_landmarks.begin(); iter!=tmp_landmarks.end(); iter++){
+  //   Landmark * lm = *iter;
+  //   std::cout << "landmark in:\t" << lm->x() << "\t"<< lm->y() <<" has " << lm->obsnum << " observations, ";
+  //   if(lm->isConfirmed()){
+  //     std::cout << "CONFIRMED\n";
+  //     landmarks.push_back(lm);
+  //   }
+  //   else{
+  //     std::cout << "IGNORED\n";
+  //   }
+  // }
+
+  // // at this point, 'landmarks' will contain the landmarks estimated positions
+  // std::cout << "\nlandmarks at:\n";
+  // std::list<Landmark *>::iterator it;
+  // for(unsigned int i=0; i< landmarks.size(); i++){
+  //   Landmark * lm = landmarks[i];
+  //   double pos[2];
+  //   lm->getPosition(pos);
+  //   double x = floorf((pos[0] * 1000) + 0.5)/1000;
+  //   double y = floorf((pos[1] * 1000) + 0.5)/1000;
+  //   std::cout << x << "  " << y << "\n";
+  // }
+  
+  // // generate output g2o file
+  // std::cout << "generating output file for g2o" << std::endl;
+  // // generate poses nodes and edges between them
+  // // g2oout << "VERTEX_SE2 " << next_id++ << " 0 0 0" << std::endl;	// very first position
+  // for(unsigned int i=0; i<poses.size(); i++){
+  //   RobotPosition * pose = poses[i];
+  //   RobotPosition * transf = (*transformations)[i];
+  //   RobotPosition * prev_pose;
+  //   // unsigned int prev_id;
+    
+  //   if(!pose->hasId()){
+  //     pose->setId(next_id++);
+  //     pose->idAssigned();
+  //   }
+    
+  //   g2oout << "VERTEX_SE2 " << pose->id() << " " << pose->x() << " " << pose->y() << " " << pose->theta() << std::endl;
+  //   optimizer->addVertex(pose);
+    
+  //   if(i>0){
+  //     prev_pose = poses[i-1];
+  //     g2oout << "EDGE_SE2 " << prev_pose->id() << " " << pose->id() << " " << transf->x() << " " << transf->y() << " " << transf->theta() << " 500 0 0 500 0 100" << std::endl;
+  //   }
+  // }
+  // // generate landmarks nodes and edges towards them from the poses where they were seen from
+  // for(unsigned int l=0; l < landmarks.size(); l++){
+  //   Landmark * lmark = landmarks[l];
+  //   if(!lmark->hasId()){
+  //     lmark->setId(next_id++);
+  //     lmark->idAssigned();
+  //   }
+  //   // add the landmark
+  //   g2oout << "VERTEX_XY " << lmark->id() << " " << lmark->x() << " " << lmark->y() << std::endl;
+  //   optimizer->addVertex(lmark);
+    
+  //   // add the associated bearing constraints
+  //   for(unsigned int o=0; o<lmark->getObservations()->size(); o++){
+  //     Observation * observation= (*(lmark->getObservations()))[o];
+  //     RobotPosition * pose = observation->pose;
+      
+  //     g2oout << "EDGE_BEARING_SE2_XY " << pose->id() << " " << lmark->id() << " " << observation->bearing << " 200" << std::endl;
+      
+  //     g2o::EdgeSE2PointXYBearing* obs_edge =  new g2o::EdgeSE2PointXYBearing;
+  //     obs_edge->vertices()[0] = pose;
+  //     obs_edge->vertices()[1] = lmark;
+  //     obs_edge->setMeasurementData(&(observation->bearing));
+  //     obs_edge->setInformation(*obs_info);
+  //     optimizer->addEdge(obs_edge);
+  //   }
+  // }
+  
+  // optimizer->save("graph_before.g2o");
+  
+  // populateGraph(&poses, &tmp_landmarks);
+  
+  // std::cout << "program terminated! You can now optimize (o) or exit (esc)" << std::endl;
+  
+  // optimizer->vertex(0)->setFixed(true);
+  // optimizer->setVerbose(true);
+  // optimizer->initializeOptimization();
+  
+  // next_optim = false;
+  // while(true)	// exit is performed inside handleEvents method
+  // {
+  //   if(next_optim){
+  //     next_optim = false;
+  //     optimizer->optimize(10);
+  //     // optimizer->save("graph_after.g2o");
+  //   }
+  //   printState(&tmp_landmarks, last_robot_pose, &drawer_robot_pose);
+  //   while(!next_optim){
+  //     handleEvents(_drawer->getWindow());
+  //     _drawer->draw();
+  //     usleep(200);
+  //   }
+  //   _drawer->clearAndDeleteLandmarks();
+  //   _drawer->clearAndDeleteUnconfirmedLandmarks();
+  // }
   
   return 0;
 }
