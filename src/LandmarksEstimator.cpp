@@ -27,23 +27,19 @@
 #define BEAR_ONLY_ANGLE_TOLERANCE	GENERAL_ANGLE_TOLERANCE/2	//	this affects associations of landmark that still have only one observation
 #define SECOND_ANGLE_MIN_DISTANCE	1*GENERAL_ANGLE_TOLERANCE	//	this tells the minimum angle needed for the second closer angle  in order not to be considered ambiguous
 
-// configs for the second algorithm
-#define DISTANCE_TOLERANCE 0.2	//	maybe this should be a global variable, that is set up according to the dimension of the space explored by the robot poses
-
-// configs for both algorithms
-#define CONFIRM_OBS	10	//	minimum number of consecutive observations needed for the landmark to be confirmed
-
-#define OPTIMIZE_EVERY 50	// every time this number of step has been performed, an optimization phase begins
 
 // usefull variables
 bool next_step; 	// when true, the algorithm analyses next step
-bool next_optim;	// when true, an optimization step is performed
+bool next_run;	// when true, an optimization step is performed
 rdrawer::RobotDrawer * _drawer;	// used for drawing on the screen
-std::vector<RobotPosition*> * transformations;  // transformations from a step to the next one
 unsigned int next_id;
-RobotPosition * last_robot_pose;
+//RobotPosition * last_robot_pose;
 Eigen::Matrix3d * odom_info;
 Eigen::MatrixXd * obs_info;
+
+unsigned int _confirm_obs;	//	minimum number of consecutive observations needed for the landmark to be confirmed
+unsigned int _optimize_every;	// every time this number of step has been performed, an optimization phase begins
+
 
 
 // types definition
@@ -69,8 +65,8 @@ void handleEvents(sf::RenderWindow * window){
       case sf::Key::L:
 	_drawer->zoom(0.9);
 	break;
-      case sf::Key::O:
-	next_optim = true;
+      case sf::Key::R:
+	next_run = true;
 	break;
       case sf::Key::Escape:
 	exit(0);
@@ -243,7 +239,7 @@ void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,st
 	Landmark * lm = (*last_observations)[associations[i]];
 	lm->addObservation(&(pose->observations[i]));
 	lm->estimatePosition();
-	lm->checkConfirmed(CONFIRM_OBS);
+	lm->checkConfirmed(_confirm_obs);
 	double newpos[2];
 	(*last_observations)[associations[i]]->getPosition(newpos);
 	std::cout << "\tnew position estimated:\t" << newpos[0] << "\t" << newpos[1] << "\n";
@@ -271,7 +267,7 @@ void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,st
     Landmark * lm = (*last_observations)[i];
     if(!associated[i]){
       // for the landmarks expected to be seen that are not in the current set of observations, we have two cases:
-      if(lm->getObservations()->size() > CONFIRM_OBS){
+      if(lm->getObservations()->size() > _confirm_obs){
 	// case one: the landmark has at least CONFIRM_OBS observations, then it must be confirmed
 	std::cout << "was old enough, CONFIRMED\n";
 	lm->confirm();
@@ -296,7 +292,7 @@ void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,st
   std::cout << "\n\n";
 }
 
-void printState(std::list<Landmark*> * landmarks, std::vector<RobotPosition *> * poses, unsigned int current){
+void printState(std::list<Landmark*> * landmarks, std::vector<RobotPosition *> * poses){
   // landmarks
   std::list<Landmark *>::iterator it;
   for(it = landmarks->begin(); it != landmarks->end(); it++){
@@ -316,7 +312,7 @@ void printState(std::list<Landmark*> * landmarks, std::vector<RobotPosition *> *
   }
   
   // current position
-  RobotPosition * pose = (*poses)[current];
+  RobotPosition * pose = (*poses)[poses->size()-1];
   rdrawer::RobotPose drawer_robot_pose;
   drawer_robot_pose.x = pose->x();
   drawer_robot_pose.y = pose->y();
@@ -326,6 +322,9 @@ void printState(std::list<Landmark*> * landmarks, std::vector<RobotPosition *> *
 
 void init(){
   std::cout << "Initializing stuff" << std::endl;
+  
+  _confirm_obs = 10;
+  _optimize_every = 50;	
   
   next_id = 0;
   
@@ -346,31 +345,50 @@ void init(){
   g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton(blockSolver);
   
   optimizer->setAlgorithm(solver);
-  optimizer->setVerbose(true);
+  //optimizer->setVerbose(true);
   
   // creating the drawer
   _drawer = new rdrawer::RobotDrawer();
 }
 
-void posesToTransformations(std::vector<RobotPosition*> poses){
-  Eigen::Matrix3d buff_transf;
-  buff_transf <<	1, 0, 0,
-    			0, 1, 0,
-    			0, 0, 1;
-  for(unsigned int p=0; p<poses.size; p++){
+void posesToTransformations(std::vector<RobotPosition*> *poses, std::vector<RobotPosition*> *transformations){
+  transformations->clear();
+  
+  Eigen::Matrix3d M1;
+  Eigen::Matrix3d M2;
+  M1 <<	1, 0, 0,
+       	0, 1, 0,
+	0, 0, 1;
+  
+  for(unsigned int p=0; p<poses->size(); p++){
+    M2 = r2t((*poses)[p]);
+    Eigen::Vector3d t = t2v(M1.inverse()*M2);
+    RobotPosition * rototransl = new RobotPosition(t[0], t[1], t[2]);
     
+    for(unsigned int o=0; o<(*poses)[p]->observations.size(); o++){
+      rototransl->addObs((*poses)[p]->observations[o].bearing);
+    }
+    
+    transformations->push_back(rototransl);
+    
+    M1=M2;
   }
 }
 
-void populateGraph(std::vector<RobotPosition *> * poses, std::list<Landmark *> * landmarks){
+void populateGraph(std::vector<RobotPosition *> * poses, std::vector<RobotPosition*> * transformations, std::list<Landmark *> * landmarks){
   std::cout << "clearing optimizer..." << std::endl;
   // optimizer->clear();
   
   // put poses in the graph
   for(unsigned int i=0; i<poses->size(); i++){
+    if((*poses)[i]->already_in_graph){
+      continue;
+    }
+    
     // add this pose to the graph
     optimizer->addVertex((*poses)[i]);
-        
+    ((*poses)[i])->already_in_graph = true;
+    
     if(i>0){
       // add the constraint regarding the rototranslation performed from the previous step
       g2o::EdgeSE2 * odom_edge = new g2o::EdgeSE2;
@@ -392,6 +410,12 @@ void populateGraph(std::vector<RobotPosition *> * poses, std::list<Landmark *> *
     if(!lm->isConfirmed()){
       continue;
     }
+    
+    if(lm->already_in_graph){
+      continue;
+    }
+    
+    lm->already_in_graph = true;
     
     if(!lm->hasId()){
       lm->setId(next_id++);
@@ -429,6 +453,9 @@ void deleteUnconfirmedLandmarks(std::list<Landmark *> * landmarks, std::vector<L
     if(lm->isConfirmed()){
       buffer->push_back(lm);
     }
+    else{
+      delete lm;
+    }
   }
   
   landmarks->clear();
@@ -439,7 +466,7 @@ void deleteUnconfirmedLandmarks(std::list<Landmark *> * landmarks, std::vector<L
   buffer->clear();
 }
 
-void generateGraphFile(char* filename, std::vector<RobotPosition *> * poses, std::list<Landmark *> * landmarks){
+void generateGraphFile(char* filename, std::vector<RobotPosition *> * poses, std::vector<RobotPosition*>* transformations, std::list<Landmark *> * landmarks){
   std::string graphname = basename(filename);
   graphname = graphname.substr(0,graphname.length()-4);
   std::ofstream g2oout((graphname+(std::string("_graph.g2o"))).c_str());
@@ -485,14 +512,36 @@ void generateGraphFile(char* filename, std::vector<RobotPosition *> * poses, std
   }
 }
 
-
-void runAlgorithm(std::vector<RobotPosition*> * poses, std::list<Landmark*> * landmarks){
+// runs the association algorithm.
+// reads informations from 'transformations'
+// stores informations in 'poses' and 'landmarks'
+void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition*> * transformations, std::list<Landmark*> * landmarks){
+  
   std::vector<Landmark *> buff1;
   std::vector<Landmark *> buff2;
   bool buffswitch = true;
+  Eigen::Matrix3d buff_transf;
+  buff_transf <<	1, 0, 0,
+    			0, 1, 0,
+    			0, 0, 1;
   unsigned int loop_iterations = 0;
   
-  for(unsigned int i=0; i<poses->size(); i++){
+  for(unsigned int i=0; i<transformations->size(); i++){
+    loop_iterations ++;
+    next_step=false;
+    
+    // add the new pose to the vector
+    if(i!=0){
+      buff_transf = r2t((*poses)[i-1]);
+    }
+    poses->push_back(concatenate((*transformations)[i], buff_transf));
+    //last_robot_pose = poses[i];
+    
+    // if the pose doesn't have an id, assign one
+    (*poses)[i]->setId(next_id++);
+    (*poses)[i]->idAssigned();
+    
+    std::cout << "\nstep " << i+1 << "\n";
     if(buffswitch){
       tryToUnderstand1((*poses)[i], landmarks, &buff1, &buff2);
     }
@@ -501,20 +550,20 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::list<Landmark*> * la
     }
     buffswitch = !buffswitch;
     
-    if(loop_iterations > OPTIMIZE_EVERY){	// time to optimize
+    if(loop_iterations > _optimize_every){	// time to optimize
       std::cout << "time to optimize" << std::endl;
       loop_iterations = 0;
       buff1.clear();
       buff2.clear();
       deleteUnconfirmedLandmarks(landmarks, &buff1);
       
-      populateGraph(poses, landmarks);
+      populateGraph(poses, transformations, landmarks);
       
-      optimizer->optimize(10);
+      optimizer->optimize(30);
     }
     
     std::cout << "creating image...\n";
-    printState(landmarks, poses, i);
+    printState(landmarks, poses);
     
     std::cout << "displaying image...\n";
     while(!next_step){
@@ -524,6 +573,16 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::list<Landmark*> * la
     }
     _drawer->clearAll();
   }
+  buff1.clear();
+  buff2.clear();
+  deleteUnconfirmedLandmarks(landmarks, &buff1);
+  
+  populateGraph(poses, transformations, landmarks);
+  optimizer->optimize(10);
+  
+  printState(landmarks, poses);
+  _drawer->draw();
+  _drawer->clearAll();
 }
 
 
@@ -540,8 +599,8 @@ int main(int argc, char** argv){
   init();
   
   // create structures for storing datas
-  std::vector<RobotPosition*> poses;  // absolute poses
-  transformations = new std::vector<RobotPosition *>;
+  std::vector<RobotPosition*> * poses = new std::vector<RobotPosition*>();  // absolute poses
+  std::vector<RobotPosition*> * transformations = new std::vector<RobotPosition*>();
   std::list<Landmark *> landmarks_list;	// this is a buffer
   
   // add the first node
@@ -554,100 +613,37 @@ int main(int argc, char** argv){
     std::cout << "no infos loaded... quitting" << std::endl;
     exit(0);
   }
-
-  //<<<<<<<<<<<BEGIN OF ALGORITHM 1 LAUNCHER
-  std::vector<Landmark *> buff1;
-  std::vector<Landmark *> buff2;
-  bool buffswitch = true;
-  Eigen::Matrix3d buff_transf;
-  buff_transf <<	1, 0, 0,
-    			0, 1, 0,
-    			0, 0, 1;
   
-  unsigned int loop_iterations = 0;
+  runAlgorithm(poses, transformations, &landmarks_list);
   
-  for (unsigned int i=0; i<transformations->size(); i++){
-    
-    loop_iterations ++;
-    next_step = false;
-    
-    // add the new pose to the vector
-    if(i!=0){
-      buff_transf = r2t(poses[i-1]);
-    }
-    poses.push_back(concatenate((*transformations)[i], buff_transf));
-    last_robot_pose = poses[i];
-    
-    // assign an ID
-    poses[i]->setId(next_id++);
-    poses[i]->idAssigned();
-    
-    std::cout << "\nstep " << i+1 << "\n";
-    if(buffswitch){
-      tryToUnderstand1(poses[i], &landmarks_list, &buff1, &buff2);
-    }
-    else{
-      tryToUnderstand1(poses[i], &landmarks_list, &buff2, &buff1);
-    }
-    buffswitch = !buffswitch;
-    
-    if(loop_iterations > OPTIMIZE_EVERY){	// time to optimize
-      std::cout << "time to optimize" << std::endl;
-      loop_iterations = 0;
-      buff1.clear();
-      buff2.clear();
-      deleteUnconfirmedLandmarks(&landmarks_list, &buff1);
-      
-      populateGraph(&poses, &landmarks_list);
-      
-      optimizer->optimize(10);
-    }
-    
-    std::cout << "creating image...\n";
-    printState(&landmarks_list, &poses, i);
-    
-    std::cout << "displaying image...\n";
-    while(!next_step){
+  bool first_run = true;
+  
+  while(true){	// exit is performed inside handleEvents method
+    std::cout << std::endl << std::endl <<  "algorithm finished. Now press:"<<std::endl;
+    std::cout << "\tR key to rerun the algorithm assuming the new poses as initial guess" << std::endl;
+    std::cout << "\tESC to quit" <<std::endl;
+    next_run = false;
+    printState(&landmarks_list, poses);
+    while(!next_run){
       handleEvents(_drawer->getWindow());
       _drawer->draw();
       usleep(200);
     }
     _drawer->clearAll();
     
-    // cvWaitKey(0);
+    // when the program arrives here, it means that the user has asked for another algorithm round
+    
+    //std::vector<RobotPosition*> * newtransformations = new std::vector<RobotPosition*>();
+    transformations->clear();
+    posesToTransformations(poses, transformations);
+    poses->clear();
+    optimizer->clear();
+    landmarks_list.clear();
+    next_id = 0;
+    //_confirm_obs += 5;
+    //_optimize_every += 10;
+    runAlgorithm(poses ,transformations, &landmarks_list);
   }
-  
-  buff1.clear();
-  buff2.clear();
-  deleteUnconfirmedLandmarks(&landmarks_list, &buff1);
-  
-  populateGraph(&poses, &landmarks_list);
-  optimizer->optimize(10);
-  //>>>>>>>>>>>END OF ALGORITHM 1 LAUNCHER
-  
-  std::cout << "program terminated! You can now keep optimizing optimize (o) or exit (esc)" << std::endl;
-  next_optim = false;
-  while(true)	// exit is performed inside handleEvents method
-  {
-    if(next_optim){
-      next_optim = false;
-      optimizer->optimize(10);
-      // optimizer->save("graph_after.g2o");
-    }
-    printState(&landmarks_list, &poses, poses.size()-1);
-    while(!next_optim){
-      handleEvents(_drawer->getWindow());
-      _drawer->draw();
-      usleep(200);
-    }
-    _drawer->clearAll();
-  }
-  
-  
-  bool converged = false;
-  // we now have a new guess about the poses
-  // let's rerun the algorithm with these new poses
-  
 
   return 0;
 }

@@ -12,38 +12,26 @@
 class Observation;
 class RobotPosition;
 
-class id_checkable{
-  bool id_assigned;
-  
+class GraphNode{
  public:
-  id_checkable(){id_assigned = false;};
+  bool already_in_graph;
+  bool id_assigned;
+  GraphNode(){this->already_in_graph = false; id_assigned = false;};
   bool hasId(){return id_assigned;};
   void idAssigned(){id_assigned = true;};
 };
-
-/* class GraphNode{ */
-/*   unsigned int id; */
-/*   bool idAssigned; */
-  
-/*  public: */
-/*   GraphNode(){id = 0; idAssigned=false;}; */
-/*   ~GraphNode(){}; */
-/*   bool hasId(){return this->idAssigned;}; */
-/*   void setId(unsigned int id){this->id = id; idAssigned = true;}; */
-/*   unsigned int getId(){return this->id;}; */
-/* }; */
 
 /*!
  * RobotPosition is a class that indicates a single position of the robot (x,y,Θ).
  * It also has an array of observations, that are the bearings captured from this position.
  */
-class RobotPosition : public g2o::VertexSE2, public id_checkable{
+class RobotPosition : public g2o::VertexSE2, public GraphNode{
  public:
   std::vector<Observation> observations;	// this contains the observations captured from this position
 
   RobotPosition(double x, double y,double theta);	// constructor
   ~RobotPosition(); // destructor
-
+  
   void addObs(double theta);	// creates an Observation object, and adds it to the Observations vector
   
   double x(){return _estimate[0];};
@@ -61,7 +49,7 @@ class Observation{
 
 };
 
-class Landmark : public g2o::VertexPointXY, public id_checkable{
+class Landmark : public g2o::VertexPointXY, public GraphNode{
   
   std::vector<Observation*> observations;	// vector of observations that were associated to this landmark
   bool confirmed;		// this tells whether the landmark has been marked as "plausible"
