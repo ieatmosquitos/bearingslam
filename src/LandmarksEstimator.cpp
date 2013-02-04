@@ -636,12 +636,20 @@ int main(int argc, char** argv){
     //std::vector<RobotPosition*> * newtransformations = new std::vector<RobotPosition*>();
     transformations->clear();
     posesToTransformations(poses, transformations);
-    poses->clear();
-    optimizer->clear();
+    
+    // remove old stuff
     landmarks_list.clear();
+    poses->clear();
+    optimizer->clear();	// this also calls delete method on the poses and landmarks involved
+    
+    // reset id counter
     next_id = 0;
+    
+    // change parameters?
     //_confirm_obs += 5;
     //_optimize_every += 10;
+    
+    // relaunch the algorithm
     runAlgorithm(poses ,transformations, &landmarks_list);
   }
 
