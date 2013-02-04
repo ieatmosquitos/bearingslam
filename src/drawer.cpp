@@ -18,6 +18,10 @@ rdrawer::RobotDrawer::RobotDrawer(){
   _robotSprite.SetImage(_robotImage);
   _robotSprite.SetCenter(_robotSprite.GetSize().x/2, _robotSprite.GetSize().y/2);
   
+  _traj_stepImage.LoadFromFile("assets/rd/trajectory_step.png");
+  _traj_stepSprite.SetImage(_traj_stepImage);
+  _traj_stepSprite.SetCenter(_traj_stepSprite.GetSize().x/2, _traj_stepSprite.GetSize().y/2);
+  
   _landmarkImage.LoadFromFile("assets/rd/landmark.png");
   _landmarkSprite.SetImage(_landmarkImage);
   _landmarkSprite.SetCenter(_landmarkSprite.GetSize().x/2, _landmarkSprite.GetSize().y/2);
@@ -77,6 +81,21 @@ void rdrawer::RobotDrawer::clearAndDeleteUnconfirmedLandmarks(){
   this->unconfirmed_landmarks.clear();
 }
 
+void rdrawer::RobotDrawer::addTrajectoryStep(double x, double y, double theta){
+  Eigen::Vector3d v(x,y,theta);
+  trajectory.push_back(v);
+}
+
+void rdrawer::RobotDrawer::clearTrajectory(){
+  trajectory.clear();
+}
+
+void rdrawer::RobotDrawer::clearAll(){
+  this->clearAndDeleteUnconfirmedLandmarks();
+  this->clearAndDeleteLandmarks();
+  this->clearTrajectory();
+}
+
 void rdrawer::RobotDrawer::draw(){
   _window.Clear();
   
@@ -96,7 +115,14 @@ void rdrawer::RobotDrawer::draw(){
     _unconf_landmarkSprite.SetPosition(unconfirmed_landmarks[i]->x + _window_width/2, _window_height/2 - unconfirmed_landmarks[i]->y);
     _window.Draw(_unconf_landmarkSprite);
   }
-
+  
+  // draw the trajectory
+  for(unsigned int s=0; s<trajectory.size(); s++){
+    _traj_stepSprite.SetPosition(trajectory[s][0] + _window_width/2, _window_height/2 - trajectory[s][1]);
+    _traj_stepSprite.SetRotation(trajectory[s][2] * 180 / M_PI);
+    _window.Draw(_traj_stepSprite);
+  }
+  
   // draw the robot
   _robotSprite.SetPosition(_robot_pose.x + _window_width/2, _window_height/2 - _robot_pose.y);
   _robotSprite.SetRotation(_robot_pose.theta * 180 / M_PI);
