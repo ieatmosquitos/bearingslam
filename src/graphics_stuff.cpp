@@ -305,7 +305,7 @@ void drawLine(cv::Mat * image, Eigen::Vector2d x1, Eigen::Vector2d x2, unsigned 
 		}
 		cv::Vec3b v;
 
-		if(channel<2){
+		if(channel<3){
 			v[0] = (uchar)0;
 			v[1] = (uchar)0;
 			v[2] = (uchar)0;
@@ -328,7 +328,7 @@ void drawLine(cv::Mat * image, Eigen::Vector2d x1, Eigen::Vector2d x2, unsigned 
 
 	cv::Vec3b v;
 
-	if(channel<2){
+	if(channel<3){
 		v[0] = (uchar)0;
 		v[1] = (uchar)0;
 		v[2] = (uchar)0;

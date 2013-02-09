@@ -16,7 +16,7 @@
  * 								149.138 71.8618
  * 								442.138 70.8618
  * 					The first element of the couple is considered to be the "x" value, while the second is the "y" (would you say?!?)
- * 					In the showed images, the y component is considered to increase "going down", so the <0,0> point will be top left corner.
+ * 					When displaying images, the y component is considered to increase "going down", so the <0,0> point will be top left corner.
  */
 
 #include "tools.cpp"
@@ -31,7 +31,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#define DISTANCE_THRESHOLD_DIVIDENDUM	100	// this affects the radius for detecting coincidences
+#define DISTANCE_THRESHOLD_DIVIDENDUM	50	// this affects the radius for detecting coincidences
 
 
 // reads the content of the given map file, and stores the relative map in the given vector

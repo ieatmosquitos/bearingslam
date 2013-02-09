@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include "tools.cpp"
-#include "graphics_stuff.cpp"
 #include "Retta2d.cpp"
 #include <list>
 #include <iostream>
