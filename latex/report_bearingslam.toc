@@ -1,6 +1,6 @@
-\contentsline {chapter}{\numberline {1}Introduction to SLAM}{2}
+\contentsline {chapter}{\numberline {1}Introduction to the problem}{2}
 \contentsline {section}{\numberline {1.1}Graph model}{2}
-\contentsline {chapter}{\numberline {2}Our case: bearing only sensor}{4}
-\contentsline {chapter}{\numberline {3}The algorithm}{5}
-\contentsline {chapter}{\numberline {4}Side projects}{6}
-\contentsline {chapter}{\numberline {5}Conclusions}{7}
+\contentsline {section}{\numberline {1.2}Our case: bearing only sensor}{3}
+\contentsline {chapter}{\numberline {2}The algorithm}{4}
+\contentsline {chapter}{\numberline {3}Side projects}{5}
+\contentsline {chapter}{\numberline {4}Conclusions}{6}
