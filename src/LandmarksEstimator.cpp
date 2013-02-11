@@ -246,8 +246,6 @@ void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,st
       }
       else{
 	std::cout << "should be tailed to " << associations[i] << ", but there is ambiguity\n";
-	// TODO:	add here instructions for ambiguous observations
-	//			maybe propagate the ambiguities to the successive step, without adding the observations to the set
       }
     }
     else{	// unassociated

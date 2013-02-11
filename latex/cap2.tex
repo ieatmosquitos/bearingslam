@@ -8,7 +8,7 @@ Each line specifies:
 
 The basic idea is that, at each step, the algorithm iterates over all the observations associated with the considered position and tries to associate them with observations from the previous step, determining if each observation should be \textbf{queued} to one of the previous tracks or it should be associated to a new landmark.
 
-Landmarks are considered \textbf{confirmed} when it has at least a certain number of associated observations.
+A landmark is considered \textbf{confirmed} when it has at least a certain number of associated observations.
 
 The \textit{track}, to which we will often refer in this chapter, is actually a landmark. When new observations are added to the track, the landmark position is re-estimated and the track is propagated to the next step.
 When, on the contrary, no new observations are associated to the track, it is not propagated, and the landmark itself is either pruned or kept (depending on the fact that it had been confirmed or not).
