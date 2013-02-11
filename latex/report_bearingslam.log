@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.11.20)  11 FEB 2013 14:32
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.11.20)  11 FEB 2013 17:42
 entering extended mode
  %&-line parsing enabled.
 **report_bearingslam.tex
@@ -227,43 +227,61 @@ File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 10.
 
-<images/graph.png, id=11, 239.77954pt x 72.27pt>
+<images/graph.png, id=11, 263.86954pt x 79.66771pt>
 File: images/graph.png Graphic file (type png)
  <use images/graph.png>
 [2
 
  <./images/graph.png>]
-<images/bearing_sensor.png, id=18, 293.095pt x 217.81375pt>
+<images/bearing_sensor.png, id=18, 322.20375pt x 239.89626pt>
 File: images/bearing_sensor.png Graphic file (type png)
 
 <use images/bearing_sensor.png>) (./cap2.tex [3 <./images/bearing_sensor.png>]
 Chapter 2.
-) (./cap3.tex [4
+Missing character: There is no â in font cmr12!
+Missing character: There is no € in font cmr12!
+Missing character: There is no ¢ in font cmr12!
+Missing character: There is no â in font cmr12!
+Missing character: There is no € in font cmr12!
+Missing character: There is no ¢ in font cmr12!
+[4
 
-]
+] <images/observation_association.png, id=30, 975.645pt x 330.23375pt>
+File: images/observation_association.png Graphic file (type png)
+
+<use images/observation_association.png> [5 <./images/observation_association.p
+ng>] <images/uncertainty1.png, id=35, 296.10625pt x 174.6525pt>
+File: images/uncertainty1.png Graphic file (type png)
+
+<use images/uncertainty1.png>
+<images/uncertainty2.png, id=36, 322.20375pt x 144.54pt>
+File: images/uncertainty2.png Graphic file (type png)
+
+<use images/uncertainty2.png> [6 <./images/uncertainty1.png> <./images/uncertai
+nty2.png>]) (./cap3.tex [7]
 Chapter 3.
 (./sec3.1.tex) (./sec3.2.tex
-<images/cpp_simulator.png, id=29, 690.58pt x 577.15625pt>
+<images/cpp_simulator.png, id=46, 690.58pt x 577.15625pt>
 File: images/cpp_simulator.png Graphic file (type png)
 
-<use images/cpp_simulator.png>) (./sec3.3.tex [5
+<use images/cpp_simulator.png>) (./sec3.3.tex [8
 
-] [6 <./images/cpp_simulator.png>] <images/mapsmerger.png, id=38, 880.28876pt x
+] [9 <./images/cpp_simulator.png>] <images/mapsmerger.png, id=54, 880.28876pt x
  694.595pt>
 File: images/mapsmerger.png Graphic file (type png)
 
-<use images/mapsmerger.png>)) (./cap4.tex [7 <./images/mapsmerger.png (PNG copy
-)>]
+<use images/mapsmerger.png>)) (./cap4.tex [10 <./images/mapsmerger.png (PNG cop
+y)>]
 Chapter 4.
-) [8
+) [11
 
 ] (./report_bearingslam.aux) ) 
 Here is how much of TeX's memory you used:
- 4062 strings out of 495061
- 57304 string characters out of 1182620
- 116262 words of memory out of 3000000
- 7197 multiletter control sequences out of 15000+50000
- 13347 words of font info for 52 fonts, out of 3000000 for 9000
+ 4086 strings out of 495061
+ 57889 string characters out of 1182620
+ 116326 words of memory out of 3000000
+ 7217 multiletter control sequences out of 15000+50000
+ 14001 words of font info for 54 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
  36i,8n,38p,487b,263s stack positions out of 5000i,500n,10000p,200000b,50000s
 </usr/share/texmf-texlive/fonts/type1/public/amsf
@@ -272,10 +290,11 @@ onts/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr
 /share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf
 -texlive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-texlive/font
 s/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/publi
-c/amsfonts/cm/cmsy10.pfb>
-Output written on report_bearingslam.pdf (9 pages, 770271 bytes).
+c/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/
+cm/cmti12.pfb>
+Output written on report_bearingslam.pdf (12 pages, 815581 bytes).
 PDF statistics:
- 68 PDF objects out of 1000 (max. 8388607)
+ 87 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 21 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 36 words of extra memory for PDF output out of 10000 (max. 10000000)
 

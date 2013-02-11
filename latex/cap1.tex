@@ -21,6 +21,8 @@ If there were no errors, these springs wouldn't conflict each other. The presenc
 The solution that minimizes the overall ``conflict force'' is the one that we choose as guess about the world. The search for such a state is called optimization.
 
 \section{Our case: bearing only sensor}
+%% We want to generate a 2D map of the environment and to adjust the trajectory of the robot.
+
 In order to infer something about the world, the first step is to gather data, and to associate them in a proper way.
 
 The algorithm for data association that we developed assumes that the robot is equipped with a bearing sensor. A bearing sensor is a sensor that detects an interesting point and returns, as information, the ``direction'' (actually an angle) where it is situated with respect to the robot.
@@ -37,3 +39,4 @@ Since the only information we get about the landmarks is an angle with respect t
 
 Even after the association has been done, the graph needs a dedicated kind of edge that links a robot pose to a landmark via the direction in which the landmark is seen from the robot pose. This actually constrains the detected angle and the angle computed backprojecting the estimated position of the landmark.
 
+In chapter \ref{cap:Algorithm} we discuss in details the algorithm we developed for this data association problem.
