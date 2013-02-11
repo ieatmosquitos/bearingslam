@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.11.20)  9 FEB 2013 19:07
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.11.20)  11 FEB 2013 14:32
 entering extended mode
  %&-line parsing enabled.
 **report_bearingslam.tex
@@ -242,26 +242,30 @@ Chapter 2.
 
 ]
 Chapter 3.
-(./sec3.1.tex) (./sec3.2.tex) (./sec3.3.tex [5
+(./sec3.1.tex) (./sec3.2.tex
+<images/cpp_simulator.png, id=29, 690.58pt x 577.15625pt>
+File: images/cpp_simulator.png Graphic file (type png)
 
-]
-<images/mapsmerger.png, id=32, 880.28876pt x 694.595pt>
+<use images/cpp_simulator.png>) (./sec3.3.tex [5
+
+] [6 <./images/cpp_simulator.png>] <images/mapsmerger.png, id=38, 880.28876pt x
+ 694.595pt>
 File: images/mapsmerger.png Graphic file (type png)
 
-<use images/mapsmerger.png>)) (./cap4.tex [6 <./images/mapsmerger.png (PNG copy
+<use images/mapsmerger.png>)) (./cap4.tex [7 <./images/mapsmerger.png (PNG copy
 )>]
 Chapter 4.
-) [7
+) [8
 
 ] (./report_bearingslam.aux) ) 
 Here is how much of TeX's memory you used:
- 4055 strings out of 495061
- 57131 string characters out of 1182620
- 115242 words of memory out of 3000000
- 7191 multiletter control sequences out of 15000+50000
+ 4062 strings out of 495061
+ 57304 string characters out of 1182620
+ 116262 words of memory out of 3000000
+ 7197 multiletter control sequences out of 15000+50000
  13347 words of font info for 52 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 36i,8n,38p,502b,263s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 36i,8n,38p,487b,263s stack positions out of 5000i,500n,10000p,200000b,50000s
 </usr/share/texmf-texlive/fonts/type1/public/amsf
 onts/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr
 10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr
@@ -269,9 +273,9 @@ onts/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr
 -texlive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-texlive/font
 s/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/publi
 c/amsfonts/cm/cmsy10.pfb>
-Output written on report_bearingslam.pdf (8 pages, 133536 bytes).
+Output written on report_bearingslam.pdf (9 pages, 770271 bytes).
 PDF statistics:
- 63 PDF objects out of 1000 (max. 8388607)
+ 68 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 

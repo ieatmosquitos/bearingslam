@@ -5,5 +5,5 @@
 \contentsline {chapter}{\numberline {3}Side projects}{5}
 \contentsline {section}{\numberline {3.1}Simulator in Matlab}{5}
 \contentsline {section}{\numberline {3.2}Simulator in C++}{5}
-\contentsline {section}{\numberline {3.3}Maps Merger}{5}
-\contentsline {chapter}{\numberline {4}Conclusions}{7}
+\contentsline {section}{\numberline {3.3}Maps Merger}{6}
+\contentsline {chapter}{\numberline {4}Conclusions}{8}

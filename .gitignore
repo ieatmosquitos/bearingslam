@@ -1,7 +1,7 @@
 *.*~
 /build/
 /poses_and_landmarks/
-/latex/report_bearingslam.aux
-/latex/report_bearingslam.toc
-/latex/report_bearingslam.log
-/latex/report_bearingslam.pdf
+/latex/*.aux
+/latex/*.toc
+/latex/*.log
+/latex/*.pdf
