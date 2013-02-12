@@ -20,6 +20,7 @@
 #include "g2o/core/optimization_algorithm_factory.h"
 #include "g2o/core/optimization_algorithm_gauss_newton.h"
 #include "g2o/solvers/csparse/linear_solver_csparse.h"
+#include "g2o/core/robust_kernel_impl.h"
 
 // configs for the first algorithm
 #define GENERAL_ANGLE_TOLERANCE	0.2	// this affects the association of a new observation to the previously generated landmarks
@@ -35,6 +36,7 @@ unsigned int next_id;
 //RobotPosition * last_robot_pose;
 Eigen::Matrix3d * odom_info;
 Eigen::MatrixXd * obs_info;
+g2o::RobustKernel * robust_kernel;
 
 unsigned int _confirm_obs;	//	minimum number of consecutive observations needed for the landmark to be confirmed
 unsigned int _optimize_every;	// every time this number of step has been performed, an optimization phase begins
@@ -394,6 +396,7 @@ void populateGraph(std::vector<RobotPosition *> * poses, std::vector<RobotPositi
       g2o::SE2 * measurement = new g2o::SE2((*transformations)[i]->x(), (*transformations)[i]->y(), (*transformations)[i]->theta());
       odom_edge->setMeasurement(*measurement);
       odom_edge->setInformation(*odom_info);
+      
       optimizer->addEdge(odom_edge);
     }
   }
@@ -430,6 +433,8 @@ void populateGraph(std::vector<RobotPosition *> * poses, std::vector<RobotPositi
       obs_edge->vertices()[1] = lm;
       obs_edge->setMeasurementData(&(observation->bearing));
       obs_edge->setInformation(*obs_info);
+      robust_kernel = new g2o::RobustKernelCauchy();
+      obs_edge->setRobustKernel(robust_kernel);
       
       optimizer->addEdge(obs_edge);
     }
@@ -575,7 +580,7 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition
   deleteUnconfirmedLandmarks(landmarks, &buff1);
   
   populateGraph(poses, transformations, landmarks);
-  optimizer->optimize(10);
+  optimizer->optimize(30);
   
   printState(landmarks, poses);
   _drawer->draw();
