@@ -1,1 +1,93 @@
 \section{Simulator in Matlab}\label{sec:matlab_simulator}
+
+This Matlab odometry simulator was realized in order to simulate the uncertainties on robot perceptions originated from physical process like wheels slippage,
+or sensor noise.
+The simulator provides a GUI that allows the user to navigate in a map filled with randomly-placed landmarks, and visualize in real-time both the real configurations sequence 
+and the noised configurations sequence.
+Finally, a text file is produced, associating a sequence of robot states to the landmark perceptions from these states.
+
+\subsection{Representation of the configuration}
+Robot configuration $C$ is rapresented by the mean of a 2D homogeneous matrix.
+
+\[ 
+\textbf{C}(k) = 
+\left( \begin{array}{c:c}
+  \textbf{R}(k)  & \textbf{t}(k) \\ \hdashline
+  0 & 1  \\
+\end{array} \right)
+\]
+with $\textbf{t} = [x,y]^T$.\\
+
+The matrix also rapresents univocally a certain state of the robot $[x,y,\theta]$.
+\\
+The robot model used is a planar omnidirectional robot, with the capability of changing its linear and velocity dependings on user inputs.
+The instantaneous linear velocity $v \in \mathbb{R}$ is intended in the direction of the $x$ (sagittal) axis of the robot, while angular velocity $\theta \in \mathbb{R}$ is
+intended with respect the $z$ axis (orthogonal to the workspace).
+Of course this values are intended to be deduced from the encorders on the wheels.
+
+Given a certain configuration $\textbf{C}$ and the two instantaneous velocities $v$ and $\theta$, the new configuration is computed as:
+
+\[ 
+\textbf{C}(k+1) = 
+\left( \begin{array}{c:c}
+  %%\textbf{R(k)} * \textbf{H_r}  & \textbf{t(k)} + \textbf{\tilde{t}} \\ \hdashline
+  \textbf{R}(k) \cdot \textbf{H}_r & \textbf{t}(k) + \tilde{\textbf{t}} \\ \hdashline
+  %%\textbf{R(k)}  & \textbf{t(k)} \\ \hdashline
+  0 & 1  \\
+\end{array} \right)
+\]
+
+\[ 
+\tilde{\textbf{t}} = [\tilde{t_x},\tilde{t_y}]^T = \textbf{R}(k) \cdot [v,0]^T
+\]
+
+\[ 
+\textbf{H}_r =
+\left( \begin{array}{cc}
+  cos(\theta)  & -sin(\theta)\\ 
+  sin(\theta)  & cos(\theta) \\
+\end{array} \right)
+\]
+
+
+\subsection{Configurations storing}
+The \textit{distance} $d$ between two configuration matrices $M_1$, $M_2$ rapresenting respectively states $s1 = [x_1,y_1,\theta_1]$, ~ $s2 = [x_2,y_2,\theta_2]$
+is defined as
+\[ 
+d = \alpha \cdot d_{\theta} + d_p
+\]
+where $d_{\theta}$ is the absolute value of the the (circular) distance between angles $\theta_1$,$\theta_2$,
+and $d_p$ is the norm of the vector $[x_1 - x_2,y_1 - y_2]$.
+The parameter $\alpha$, usually $> 1$, can balance the importance of the rotation distance respect the linear one.\\
+While user navigation proceeds the simulator stores in two separete list (real and noised) all the subsequent configurations $\textbf{C}$.
+%%These two list are used to provide the user in real time the comparison between real and noised configurations.
+(IMAGE)
+In a certain time instant, both current noised and real configurations are appended to their lists if and only if the \textit{distance} between the current (noised) configuration 
+and the last saved (noised) configuration exceeds a certain threeshold.
+\\
+\subsection{Landmark locate}
+Every time that a configuration is appended to the list, is create a new landmark reading.
+A landmark reading is composed by two rows:\\
+\[ 
+odomPose ~~ <ID> ~~ n_X ~ n_Y ~  n_{\theta} ~  t_X ~  t_Y ~ t_{\theta}
+\]
+\[
+bearing ~~ b_1 ~ ... ~ b_n ~ IDb_1 ~ ... ~ IDb_n 
+\]
+
+where:
+\textit{$<ID>$} is the number of reading, $[n_X, n_Y, n_{\theta}]$ is the noised state of the robot, while $[t_X, t_Y, t_{\theta}]$ the real one.
+The $n$ values $ b_1 ... b_n$ gives the bearing angle of the $n$ landmarks visible from $[t_X t_Y t_{\theta}]$. Each landmark is then associated to his univocal ID 
+$<IDb_1> ... <IDb_n>$.
+
+\subsection{Odometry and sensors noise}
+The error on the odometry is modeled as a zero-centered white noise with gaussian distribution, that influences independently the two velocities $v$ and $\theta$.
+The standard deviation of the distribution has a constant component and an additional component that is directly proportional to the norm of velocity $v$ or $\theta$.
+In this way is modelled the fact that when velocity increase we tends to have a higher noise component.
+\\
+
+
+Note that the Odometry error is added while navigating, and influences the integration done on the robot. Conversely the error on sensor is added off-line, and it is indipendent 
+
+
+

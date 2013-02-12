@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.11.20)  11 FEB 2013 18:02
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.9.17)  12 FEB 2013 19:49
 entering extended mode
  %&-line parsing enabled.
 **report_bearingslam.tex
@@ -170,43 +170,66 @@ Package: amsthm 2004/08/06 v2.20
 \thm@headsep=\skip48
 \dth@everypar=\toks27
 )
+(/usr/share/texmf-texlive/tex/latex/arydshln/arydshln.sty
+Package: arydshln 2004/08/31 v1.71 
+\dashlinedash=\dimen124
+\dashlinegap=\dimen125
+\adl@box=\box30
+\adl@height=\dimen126
+\adl@heightsave=\dimen127
+\adl@depth=\dimen128
+\adl@depthsave=\dimen129
+\adl@finaldepth=\dimen130
+\adl@columns=\count110
+\adl@ncol=\count111
+\adl@currentcolumn=\count112
+\adl@currentcolumnsave=\count113
+\adl@totalheight=\count114
+\adl@totalheightsave=\count115
+\adl@dash=\count116
+\adl@gap=\count117
+\adl@cla=\count118
+\adl@clb=\count119
+\adl@everyvbox=\toks28
+\adl@LTpagetotal=\dimen131
+)
 (./report_bearingslam.aux)
 \openout1 = `report_bearingslam.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
+LaTeX Font Info:    ... okay on input line 16.
 
 (/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count110
-\scratchdimen=\dimen124
-\scratchbox=\box30
-\nofMPsegments=\count111
-\nofMParguments=\count112
-\everyMPshowfont=\toks28
-\MPscratchCnt=\count113
-\MPscratchDim=\dimen125
-\MPnumerator=\count114
-\everyMPtoPDFconversion=\toks29
+\scratchcounter=\count120
+\scratchdimen=\dimen132
+\scratchbox=\box31
+\nofMPsegments=\count121
+\nofMParguments=\count122
+\everyMPshowfont=\toks29
+\MPscratchCnt=\count123
+\MPscratchDim=\dimen133
+\MPnumerator=\count124
+\everyMPtoPDFconversion=\toks30
 )
-\c@lstlisting=\count115
+\c@lstlisting=\count125
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Try loading font information for U+msa on input line 16.
+LaTeX Font Info:    Try loading font information for U+msa on input line 17.
  (/usr/share/texmf-texlive/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2009/06/22 v3.00 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 16.
+LaTeX Font Info:    Try loading font information for U+msb on input line 17.
 
 (/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
@@ -260,41 +283,63 @@ File: images/uncertainty2.png Graphic file (type png)
 <use images/uncertainty2.png> [6 <./images/uncertainty1.png> <./images/uncertai
 nty2.png>]) (./cap3.tex [7]
 Chapter 3.
-(./sec3.1.tex) (./sec3.2.tex
-<images/cpp_simulator.png, id=46, 690.58pt x 577.15625pt>
+(./sec3.1.tex
+Underfull \hbox (badness 10000) in paragraph at lines 18--20
+
+ []
+
+[8
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 58--68
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 69--71
+
+ []
+
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 84--88
+
+ []
+
+) (./sec3.2.tex <images/cpp_simulator.png, id=56, 690.58pt x 577.15625pt>
 File: images/cpp_simulator.png Graphic file (type png)
 
-<use images/cpp_simulator.png>) (./sec3.3.tex [8
-
-] [9 <./images/cpp_simulator.png>] <images/mapsmerger.png, id=54, 880.28876pt x
- 694.595pt>
+<use images/cpp_simulator.png>) (./sec3.3.tex [10] [11 <./images/cpp_simulator.
+png>] <images/mapsmerger.png, id=64, 880.28876pt x 694.595pt>
 File: images/mapsmerger.png Graphic file (type png)
 
-<use images/mapsmerger.png>)) (./cap4.tex [10 <./images/mapsmerger.png (PNG cop
+<use images/mapsmerger.png>)) (./cap4.tex [12 <./images/mapsmerger.png (PNG cop
 y)>]
 Chapter 4.
-) [11
+) [13
 
 ] (./report_bearingslam.aux) ) 
 Here is how much of TeX's memory you used:
- 4086 strings out of 495061
- 57889 string characters out of 1182620
- 116326 words of memory out of 3000000
- 7217 multiletter control sequences out of 15000+50000
- 14001 words of font info for 54 fonts, out of 3000000 for 9000
+ 4291 strings out of 495061
+ 60607 string characters out of 1182621
+ 120922 words of memory out of 3000000
+ 7416 multiletter control sequences out of 15000+50000
+ 14622 words of font info for 56 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 36i,8n,38p,487b,263s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 36i,12n,38p,487b,263s stack positions out of 5000i,500n,10000p,200000b,50000s
 </usr/share/texmf-texlive/fonts/type1/public/amsf
-onts/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr
-10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr
-/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf
--texlive/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-texlive/font
-s/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/publi
-c/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/
-cm/cmti12.pfb>
-Output written on report_bearingslam.pdf (12 pages, 815581 bytes).
+onts/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cme
+x10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi12.pfb></u
+sr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/tex
+mf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive/f
+onts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-texlive/fonts/type1/p
+ublic/amsfonts/cm/cmr17.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfon
+ts/cm/cmr7.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pf
+b></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/sha
+re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texmf-te
+xlive/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on report_bearingslam.pdf (14 pages, 860195 bytes).
 PDF statistics:
- 87 PDF objects out of 1000 (max. 8388607)
+ 110 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  36 words of extra memory for PDF output out of 10000 (max. 10000000)
 
