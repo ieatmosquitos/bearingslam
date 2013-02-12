@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.11.20)  11 FEB 2013 18:02
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.11.20)  12 FEB 2013 11:13
 entering extended mode
  %&-line parsing enabled.
 **report_bearingslam.tex
@@ -257,8 +257,8 @@ File: images/uncertainty1.png Graphic file (type png)
 <images/uncertainty2.png, id=36, 322.20375pt x 144.54pt>
 File: images/uncertainty2.png Graphic file (type png)
 
-<use images/uncertainty2.png> [6 <./images/uncertainty1.png> <./images/uncertai
-nty2.png>]) (./cap3.tex [7]
+<use images/uncertainty2.png> [6 <./images/uncertainty1.png>]) (./cap3.tex
+[7 <./images/uncertainty2.png>]
 Chapter 3.
 (./sec3.1.tex) (./sec3.2.tex
 <images/cpp_simulator.png, id=46, 690.58pt x 577.15625pt>
@@ -277,10 +277,10 @@ Chapter 4.
 
 ] (./report_bearingslam.aux) ) 
 Here is how much of TeX's memory you used:
- 4086 strings out of 495061
- 57889 string characters out of 1182620
- 116326 words of memory out of 3000000
- 7217 multiletter control sequences out of 15000+50000
+ 4087 strings out of 495061
+ 57913 string characters out of 1182620
+ 117338 words of memory out of 3000000
+ 7218 multiletter control sequences out of 15000+50000
  14001 words of font info for 54 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
  36i,8n,38p,487b,263s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -292,7 +292,7 @@ onts/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr
 s/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/publi
 c/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/
 cm/cmti12.pfb>
-Output written on report_bearingslam.pdf (12 pages, 815581 bytes).
+Output written on report_bearingslam.pdf (12 pages, 820122 bytes).
 PDF statistics:
  87 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
