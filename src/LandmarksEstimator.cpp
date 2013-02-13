@@ -234,7 +234,7 @@ void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,st
   std::cout << "adding observations to landmarks\n";
   for(unsigned int i=0; i < pose->observations.size(); i++){
     std::cout << "obs " << i << " ";
-    if((associations[i] != -1) && (associated[associations[i]])){
+    if(associations[i] != -1){
       if(!ambiguous[associations[i]]){
 	std::cout << "tailed to " << associations[i] << "\n";
 	Landmark * lm = (*last_observations)[associations[i]];
