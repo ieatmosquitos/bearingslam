@@ -1,13 +1,13 @@
 \section{Simulator in Matlab}\label{sec:matlab_simulator}
 
-This Matlab odometry simulator was realized in order to consider the uncertainties on robot perceptions originated from physical process like wheels slippage,
-or sensor noise.
-The simulator provides a GUI that allows the user to navigate in a map filled with randomly-placed landmarks, and visualize in real-time both the real configurations sequence 
-and the noised configurations sequence.
-Finally, a text file is produced, associating a sequence of robot states to the landmark perceptions from these states.
+This Matlab landmark sensing simulator was realized in order to generate a sequence of observations subjected to noise to be provided at the SLAM.
+The simulator provides a GUI that allows the user to navigate in a map filled with randomly-placed landmarks, and visualize in real-time both the real 
+and the noised configurations sequences. Gaussian noise is added in order to consider the uncertainties on robot perceptions originated from physical process
+like wheels slippage or sensor noise.\\
+The simulator produces as output a text file where is associated a sequence of robot's states and the landmarks perception from these states.
 
 \subsection{Representation of the configuration}
-A robot configuration $C$ is rapresented by the mean of a 2D homogeneous matrix.
+A robot configuration $C$ is rapresented by the mean of a 2D homogeneous matrix (at the $k-th$ simulator iteration):
 
 \[ 
 \textbf{C}(k) = 
@@ -17,17 +17,13 @@ A robot configuration $C$ is rapresented by the mean of a 2D homogeneous matrix.
 \end{array} \right)
 \]
 with $\textbf{t} = [x,y]^T$.\\
-
 The matrix also rapresents univocally a certain state of the robot $[x,y,\theta]$.
 \\
 The robot model used is a planar unicycle, with two control inputs (linear and angular velocity) controllable by human user.
-The robot is equipped with a single laser scanner capable of returning the bearing of all landmarks within a certain distance.
-
+The robot is equipped with a single laser scanner capable of returning the bearing of all landmarks within a certain distance.\\
 The instantaneous linear velocity $v \in \mathbb{R}$ is directed in the $x$ (sagittal) axis of the robot, while angular velocity $\theta \in \mathbb{R}$ is
-around the $z$ axis of the workspace (orthogonal to the plane). Of course this values are intended to be deduced from the encorders on the wheels.
-
-Given a certain configuration $\textbf{C}$ and the two instantaneous velocities $v$ and $\theta$, the new configuration is computed as:
-
+around the $z$ axis of the workspace (orthogonal to the plane). Of course this values are intended to be deduced from the encorders on the wheels.\\
+Given a certain configuration $\textbf{C}$(\textit{k}) and the two instantaneous velocities $v$ and $\theta$, the configuration at the next iteration is computed as:\\
 \[ 
 \textbf{C}(k+1) = 
 \left( \begin{array}{c:c}
@@ -37,7 +33,6 @@ Given a certain configuration $\textbf{C}$ and the two instantaneous velocities 
   0 & 1  \\
 \end{array} \right)
 \]
-
 \[ 
 \tilde{\textbf{t}} = [\tilde{t_x},\tilde{t_y}]^T = \textbf{R}(k) \cdot [v,0]^T
 \]
@@ -48,51 +43,53 @@ Given a certain configuration $\textbf{C}$ and the two instantaneous velocities 
   cos(\theta)  & -sin(\theta)\\ 
   sin(\theta)  & cos(\theta) \\
 \end{array} \right)
-\]
-
+\]\\
 This model is equivalent to the unicycle in [1] (cita libro robotica).
-Note that the integration method used is the \textit{approximated Euler}, since we are considering that the $\theta$ remains constant during the integration step,
-and changes suddenly at the next step, instead of changing continuously as it would be in reality.
-
+Note that the integration method used for an ideal unicycle is the \textit{approximated Euler}, since we are considering that the $\theta$ remains constant during the integration step,
+and changes suddenly at the next step (instead of changing continuously as it would be in reality).\\
 \subsection{Configurations storing}
-The \textit{distance} $d$ between two configuration matrices $M_1$, $M_2$ rapresenting respectively states $s1 = [x_1,y_1,\theta_1]$, ~ $s2 = [x_2,y_2,\theta_2]$
+The \textit{distance} $d$ between two configuration matrices $M_1$, $M_2$ rapresenting respectively states $~ s1 = [x_1,y_1,\theta_1]$,$~ s2 = [x_2,y_2,\theta_2]~$
 is defined as
 \[ 
 d = \alpha \cdot d_{\theta} + d_p
 \]
 where $d_{\theta}$ is the absolute value of the the (circular) distance between angles $\theta_1$,$\theta_2$,
-and $d_p$ is the norm of the vector $[x_1 - x_2,y_1 - y_2]$.
-The parameter $\alpha$, usually $> 1$, can balance the importance of the rotation distance respect the linear one.\\
-While user navigation proceeds the simulator stores in two separete list (real and noised) all the subsequent configurations $\textbf{C}$.
+and $d_p$ is the norm of the vector $[x_1 - x_2,y_1 - y_2]^T$.\\
+The parameter $\alpha$, usually bigger than $1$, balances the importance of the rotation component respect the linear one.\\
+While user navigation proceeds the simulator stores in two separete lists (real and noised) the subsequent configurations $\textbf{C}$.
+In a certain iteration, both current noised and real configurations are appended to their lists if and only if the \textit{distance} between the current noised configuration 
+and the last saved noised configuration exceeds a certain threeshold (this models an on-board robot software that can dispose only of the noised perceptions).\\
 %%These two list are used to provide the user in real time the comparison between real and noised configurations.
-(IMAGE)
-In a certain time instant, both current noised and real configurations are appended to their lists if and only if the \textit{distance} between the current (noised) configuration 
-and the last saved (noised) configuration exceeds a certain threeshold.
+\\
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[width=0.8\textwidth]{images/matlab_simulator.png}
+  \caption{GUI rapresents both real (red) and noised (blue) configuration sequences.}
+  \label{fig:matlab_simulator}
+\end{figure}
+
 \\
 \subsection{Landmark readings}
-Every time that a configuration is appended to the list, a new \textit{landmark reading} is created.
-A \textit{landmark reading} is composed by two rows:\\
-\[ 
-odomPose, ~~ <ID>, ~~ n_X, ~ n_Y, ~  n_{\theta}, ~  t_X, ~  t_Y, ~ t_{\theta}
-\]
-\[
-bearing, ~~ b_1, ~ ... ~ b_n, ~ IDb_1, ~ ... ~ IDb_n, 
-\]
+Every time that a configuration is appended to its list, a new \textit{landmark reading} is appended at the simulator's output file.
+A \textit{landmark reading} is composed by two rows with a certain number of fields:\\\
 
+$
+odomPose, ~~ ID, ~~ n_X, ~ n_Y, ~  n_{\theta}, ~  t_X, ~  t_Y, ~ t_{\theta}
+$\\
+
+$
+bearing, ~~ b_1, ~ ... ~ b_n, ~ IDb_1, ~ ... ~ IDb_n, 
+$\\ \\
 where:
-\textit{$<ID>$} is the number of reading, $[n_X, n_Y, n_{\theta}]$ is the noised state of the robot, while $[t_X, t_Y, t_{\theta}]$ the real one.
-The $n$ values $ b_1 ... b_n$ gives the bearing angle of the $n$ landmarks visible from $[t_X t_Y t_{\theta}]$. Each landmark is then associated to his univocal ID 
-$<IDb_1> ... <IDb_n>$.\\
-At the end of the navigation an output file consisting in a sequence of \textit{landmark readings} is produced from the simulator.
+\textit{$ID$} is the identificative number of the reading, $[n_X, n_Y, n_{\theta}]$ is the noised state of the robot, $[t_X, t_Y, t_{\theta}]$ the real one.
+The $n$ values $ b_1 ... b_n$ gives the bearing angle of the $n$ landmarks visible from $[t_X, t_Y, t_{\theta}]$. The $i-th$ bearing value is then associated to 
+the relative landmark's identificative number $IDb_i$.
+The n landmarks are the perceptible one, that means that are within a certain constant distance $r$ from position $[t_X, t_]$.
+
 
 \subsection{Odometry and sensors noise}
 The error on the odometry is modeled as a zero-centered white noise with gaussian distribution, that influences independently the two velocities $v$ and $\theta$.
 The standard deviation of the distribution has a constant component and an additional component that is directly proportional to the norm of velocity $v$ or $\theta$.
-In this way is modelled the fact that usually in reality we tends to have higher odometric noise with higher robot wheels velocities.
+In this way is modelled the fact that usually in reality we tends to have higher odometric error with higher robot wheels velocities.
 \\
-The error on the sensor is modelled as a zero-centered white noise with gaussian distribution, that is directly summed to the bearing readings.
-
-Note that the Odometry error is added while navigating, and influences the integration done on the robot. Conversely the error on sensor is added off-line, and it is indipendent 
-
-
-
+The error on the bearing sensor is modelled as a zero-centered white noise with gaussian distribution, that is directly summed to the bearing readings.\\
