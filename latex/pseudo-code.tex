@@ -52,17 +52,17 @@
     // this is the actual data association function
     // returns a Landmark list containing the tracks to be propagated to the next step
     // REMEMBER that 'tracks' are just 'landmarks', hence the term is often used interchangeably
-    tryToUnderstand(current_pose, previous_observations)
+    tryToUnderstand(current_pose, previous_tracks)
     {
       // prepare structures
       list<Landmark> propagate;	// list used to propagate tracks to the next step.
       
-      double expected[previous_observations.size()];	// an array of doubles with a value for each of the previous observations
+      double expected[previous_tracks.size()];	// an array of doubles with a value for each of the tracked landmarks
       
       int associations[current_pose.observations.size()]	// an array with as many integers as the measurements in the current pose.
       
       // populate 'expected' with the angles where we expect to see the landmarks that have been propagated from the previous step
-      for each landmark 'lmark' in previous_observations
+      for each landmark 'lmark' in previous_tracks
       	// first case
       	if the landmark has an estimated position
           expected.add(backprojection(lmark, current_pose));
@@ -76,7 +76,7 @@
       for each observation 'obs' in current_pose.observations
         
         // compute the angle distances from the 'expected' angles 
-        double distances[previous_observations.size()];
+        double distances[previous_tracks.size()];
         distances <- computeDistances(obs.bearing, expected);
         // 'distances' now contains the ``distance'' of the current observation from each of the expected values
         
@@ -108,11 +108,11 @@
       
       // next step: determine another kind of ambiguity: when two new observations ask to be associated to the same existing track
       
-      bool has_new_obs[previous_observations.size()];
+      bool has_new_obs[previous_tracks.size()];
       // a boolean for each track
       // has_new_obs[i] will be set to true if at least one new observation is associable to the i-th track
       
-      bool ambiguous[previous_observations.size()];
+      bool ambiguous[previous_tracks.size()];
       // a boolean for each track
       // ambiguous[i] will be set to true if more than one observation is associable to the i-th track
       
@@ -137,7 +137,7 @@
       	track_index = associations[obs];
       	if track_index != -1
         	if ambiguous[track_index] == false	// obs can be tailed to the track
-        	        selected_track = previous_observations[track_index];
+        	        selected_track = previous_tracks[track_index];
                         selected_track.addObservation(obs);
                 	re-estimate landmark position;
                         check if the landmark should be set to 'confirmed', and in case set it;
@@ -153,7 +153,7 @@
     
       
       // now re-scan all the tracks from previous step, and if needed prune them (kill the landmark).
-      for each track 'tr' in previous_observations
+      for each track 'tr' in previous_tracks
       	if has_new_obs[tr] == false
         	// we expected to see this landmark, but we didn't so we have two cases:
                 if tr.confirmed == true
