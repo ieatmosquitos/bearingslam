@@ -45,7 +45,7 @@ In the second case, an assumption is made: given that the captures are ``close''
 
 \subsection{More than a close track}\label{subsec:twotracks}
 It can happen that the observation we are evaluating is close to two of the tracks. There is of course a track that is ``closer'' than the other, but they are both inside a certain threshold.\footnote{We actually defined a threshold for the closer and another threshold for the second closer.}
-In this case, we simply ignore the new observation.
+In this case, we simply start a new track with the new observation.
 
 \begin{figure}[htbp]
   \centering
@@ -73,7 +73,7 @@ We now face the dual problem: it can happen that two of the current observations
 Just like before, we cannot risk to associate a landmark with wrong measurements.
 Moreover, it is obvious that a single landmark shouldn't generate two measurements.
 Following the idea that not knowing is better than thinking wrong, we don't add either of the two observation to the track.
-Anyway, the track is propagated to the next trajectory step.
+Anyway, if the landmark had been \textit{confirmed} (I.E. it is considered reliable), its corresponding track  is propagated to the next trajectory step.
 
 \subsection{Further robustness}
 Even with the precautions explained in sections \ref{subsec:twotracks} and \ref{subsec:twoobservations}, it can still happen that a wrong association is generated. In order to deal with this problem, the effect of edges in the optimization steps is limited via the use of the so called \textit{robust kernels}.
@@ -99,79 +99,10 @@ First of all, some pseudo-structures.
     \begin{itemize}
       \item Coordinates (x,y).
       \item A set of references to Observations (all the observations that have been associated to this landmark)
+      \item Confirmed status. It will be set to true when the landmark has been seen enough times.
     \end{itemize}
 \end{itemize}
 
 And here is the algorithm:
+\input{pseudo-code.tex}
 
-{\footnotesize
-  \lstset{language=C}
-  \begin{lstlisting}[frame=shadowbox,breaklines]
-    definitions:
-    	OPTIMIZE_EVERY	// every time this number of steps has been performed, an optimization sequence is made
-    
-    global variables: 
-    	landmarks_list	// list where landmarks are inserted
-        graph	// the graph to be used for optimization
-        
-    // This function manages the algorithm iterations.
-    // 'steps' is the sequence of steps, each with the relative transformation with respect to the previous step and a set of observations.
-    algorithm_launcher(steps)
-    {
-      // 'previous_observations' and 'propagate_observations' are lists used to keep track step after step of the observed landmarks
-      previous_observations = new empty Landmarks list;
-      propagate_observations = new empty Landmarks list;
-      
-      int loop_count = 0;	// increases at every step, is set to 0 when optimization is performed
-      
-      for each step
-        loop_count ++;
-      	current_position = compute the new position appending the new step to the previous one;
-        current_position.observations = step.observations;
-        
-        // the observations propagated from the previous step are moved to the specific list
-        previous_observations = propagate_observations;
-        clear propagate_observations;
-        
-        propagate_observations = tryToUnderstand(current_position, previous_observations);
-        
-        if loop_count > OPTIMIZE_EVERY
-        	loop_count = 0;
-                populate the graph with new landmarks nodes and edges;
-                graph.optimize();
-        
-      // end of 'for each step'
-      
-      // last optimization
-      populate the graph with new landmarks nodes and edges;
-      graph.optimize();
-      
-      // expectation maximization
-      in case it is needed/required_by_the_user
-      	steps = compute relative transformations from the optimized positions;
-        algorithm_launcher(steps)	// rerun the algorithm
-    }
-    
-    
-    // this is the actual data association function
-    // returns a Landmark list containing the tracks to be propagated to the next step
-    tryToUnderstand(current_pose, previous_observations)
-    {
-      // prepare structures
-      double expected[propagate_observations.size()];	// an array of doubles with a value for each of the previous observations
-      
-      int associations[current_pose.observations.size()]	// an array with as many integers as the measurements in the current pose.
-      
-      // populate 'expected' with the angles where we expect to see the landmarks that have been propagated from the previous step
-      for each landmark 'lmark' in previous_observations
-      	// first case
-      	if the landmark has an estimated position
-          expected.add(backprojection(lmark, current_pose));
-        else  // second case
-          prev_measure = extract last measured angle for the landmark;
-          expected.add(prev_measure - relative_rot);	// relative_rot is the rotation performed from the previous step
-      
-      TO BE CONTINUED - also see LandmarkEstimator.cpp, line 145
-    }
-  \end{lstlisting}
-}

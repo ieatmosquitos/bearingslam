@@ -266,13 +266,12 @@ void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,st
     Landmark * lm = (*last_observations)[i];
     if(!associated[i]){
       // for the landmarks expected to be seen that are not in the current set of observations, we have two cases:
-      if(lm->getObservations()->size() > _confirm_obs){
-	// case one: the landmark has at least CONFIRM_OBS observations, then it must be confirmed
+      if(lm->isConfirmed()){
+	// case one: the landmark has been confirmed observations, then it is reliable
 	std::cout << "was old enough, CONFIRMED\n";
-	lm->confirm();
       }
       else{
-	// case two: the landmark has less than CONFIRM_OBS observations, then it is trashed
+	// case two: the landmark is pretty unreliable, then it is trashed
 	std::cout << "was too young, REMOVED\n";
 	landmarks->remove(lm);
 	delete lm;
@@ -280,8 +279,16 @@ void tryToUnderstand1(RobotPosition * pose,  std::list<Landmark *>* landmarks,st
     }
     else{
       if(ambiguous[i]){
-	std::cout << "was ambiguous, PROPAGATED as it is\n";
-	propagate_observations->push_back(lm);
+	std::cout << "was ambiguous,";
+	if(lm->isConfirmed()){
+	  std::cout << " but it was considered reliable, PROPAGATED" << std::endl;
+	  propagate_observations->push_back(lm);
+	}
+	else{
+	  std::cout << " and it was pretty young, REMOVED" << std::endl;
+	  landmarks->remove(lm);
+	  delete lm;
+	}
       }
       else{
 	std::cout << "has been REINFORCED\n";
