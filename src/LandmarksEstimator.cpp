@@ -30,7 +30,8 @@
 
 // usefull variables
 bool next_step; 	// when true, the algorithm analyses next step
-bool next_run;	// when true, an optimization step is performed
+bool next_run;	// when true, the algorithm is rerunned with the newly computed position as initial guess (I.E. Expectation Maximization)
+bool free_running;	// when true, the algorithm will run up to its end (no need to press a button at every step)
 rdrawer::RobotDrawer * _drawer;	// used for drawing on the screen
 unsigned int next_id;
 //RobotPosition * last_robot_pose;
@@ -59,6 +60,10 @@ void handleEvents(sf::RenderWindow * window){
       case sf::Key::N:
       case sf::Key::Return:
 	next_step = true;
+	break;
+      case sf::Key::F:
+      case sf::Key::Space:
+	free_running = !free_running;
 	break;
       case sf::Key::P:
 	_drawer->zoom(1.1);
@@ -475,6 +480,30 @@ void deleteUnconfirmedLandmarks(std::list<Landmark *> * landmarks, std::vector<L
   buffer->clear();
 }
 
+// delete unconfirmed landmarks from the given landmarks vector. buffer is used as a buffer and its contents are cleared.
+void deleteUnconfirmedLandmarks(std::vector<Landmark *> * toBeCleaned, std::vector<Landmark *> * buffer, std::list<Landmark *> * total_list){
+  
+  buffer->clear();
+  for(unsigned int i=0; i<toBeCleaned->size(); i++){
+    Landmark * lm = (*toBeCleaned)[i];
+    
+    if(lm->isConfirmed()){
+      buffer->push_back(lm);
+    }
+    else{
+      total_list -> remove(lm);
+      delete lm;
+    }
+  }
+  
+  toBeCleaned->clear();
+  
+  for(unsigned int i=0; i<buffer->size(); i++){
+    toBeCleaned->push_back((*buffer)[i]);
+  }
+  buffer->clear();
+}
+
 void generateGraphFile(char* filename, std::vector<RobotPosition *> * poses, std::vector<RobotPosition*>* transformations, std::list<Landmark *> * landmarks){
   std::string graphname = basename(filename);
   graphname = graphname.substr(0,graphname.length()-4);
@@ -535,6 +564,8 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition
     			0, 0, 1;
   unsigned int loop_iterations = 0;
   
+  free_running = false;
+  
   for(unsigned int i=0; i<transformations->size(); i++){
     loop_iterations ++;
     next_step=false;
@@ -562,9 +593,17 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition
     if(loop_iterations > _optimize_every){	// time to optimize
       std::cout << "time to optimize" << std::endl;
       loop_iterations = 0;
-      buff1.clear();
-      buff2.clear();
-      deleteUnconfirmedLandmarks(landmarks, &buff1);
+      
+      if(buffswitch){
+	// buff1 contains the observations to be propagated, use buff2 as buffer
+	buff2.clear();
+	deleteUnconfirmedLandmarks(&buff1, &buff2, landmarks);
+      }
+      else{
+	// vice versa
+	buff1.clear();
+	deleteUnconfirmedLandmarks(&buff2, &buff1, landmarks);
+      }
       
       populateGraph(poses, transformations, landmarks);
       
@@ -575,13 +614,23 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition
     printState(landmarks, poses);
     
     std::cout << "displaying image...\n";
-    while(!next_step){
+    
+    if(free_running){
       handleEvents(_drawer->getWindow());
       _drawer->draw();
       usleep(200);
     }
+    
+    while(!next_step && !free_running){
+      handleEvents(_drawer->getWindow());
+      _drawer->draw();
+      usleep(200);
+    }
+    
     _drawer->clearAll();
   }
+  free_running = false;
+  
   buff1.clear();
   buff2.clear();
   deleteUnconfirmedLandmarks(landmarks, &buff1);
