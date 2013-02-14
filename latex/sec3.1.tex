@@ -20,10 +20,11 @@ with $\textbf{t} = [x,y]^T$.\\
 The matrix also rapresents univocally a certain state of the robot $[x,y,\theta]$.
 \\
 The robot model used is a planar unicycle, with two control inputs (linear and angular velocity) controllable by human user.
-The robot is equipped with a single laser scanner capable of returning the bearing of all landmarks within a certain distance.\\
+The robot is equipped with a sensor capable of returning the bearing of all landmarks within a certain distance $r$.\\
 The instantaneous linear velocity $v \in \mathbb{R}$ is directed in the $x$ (sagittal) axis of the robot, while angular velocity $\theta \in \mathbb{R}$ is
 around the $z$ axis of the workspace (orthogonal to the plane). Of course this values are intended to be deduced from the encorders on the wheels.\\
 Given a certain configuration $\textbf{C}$(\textit{k}) and the two instantaneous velocities $v$ and $\theta$, the configuration at the next iteration is computed as:\\
+\vspace{1 cm}
 \[ 
 \textbf{C}(k+1) = 
 \left( \begin{array}{c:c}
@@ -44,6 +45,7 @@ Given a certain configuration $\textbf{C}$(\textit{k}) and the two instantaneous
   sin(\theta)  & cos(\theta) \\
 \end{array} \right)
 \]\\
+
 This model is equivalent to the unicycle in [1] (cita libro robotica).
 Note that the integration method used for an ideal unicycle is the \textit{approximated Euler}, since we are considering that the $\theta$ remains constant during the integration step,
 and changes suddenly at the next step (instead of changing continuously as it would be in reality).\\
@@ -57,7 +59,7 @@ where $d_{\theta}$ is the absolute value of the the (circular) distance between 
 and $d_p$ is the norm of the vector $[x_1 - x_2,y_1 - y_2]^T$.\\
 The parameter $\alpha$, usually bigger than $1$, balances the importance of the rotation component respect the linear one.\\
 While user navigation proceeds the simulator stores in two separete lists (real and noised) the subsequent configurations $\textbf{C}$.
-In a certain iteration, both current noised and real configurations are appended to their lists if and only if the \textit{distance} between the current noised configuration 
+At a certain iteration, both current noised and real configurations are appended to their lists if and only if the \textit{distance} between the current noised configuration 
 and the last saved noised configuration exceeds a certain threeshold (this models an on-board robot software that can dispose only of the noised perceptions).\\
 %%These two list are used to provide the user in real time the comparison between real and noised configurations.
 \\
@@ -68,7 +70,7 @@ and the last saved noised configuration exceeds a certain threeshold (this model
   \label{fig:matlab_simulator}
 \end{figure}
 
-\\
+\vspace{1 cm}
 \subsection{Landmark readings}
 Every time that a configuration is appended to its list, a new \textit{landmark reading} is appended at the simulator's output file.
 A \textit{landmark reading} is composed by two rows with a certain number of fields:\\\
@@ -84,7 +86,7 @@ where:
 \textit{$ID$} is the identificative number of the reading, $[n_X, n_Y, n_{\theta}]$ is the noised state of the robot, $[t_X, t_Y, t_{\theta}]$ the real one.
 The $n$ values $ b_1 ... b_n$ gives the bearing angle of the $n$ landmarks visible from $[t_X, t_Y, t_{\theta}]$. The $i-th$ bearing value is then associated to 
 the relative landmark's identificative number $IDb_i$.
-The n landmarks are the perceptible one, that means that are within a certain constant distance $r$ from position $[t_X, t_]$.
+The n landmarks are the perceptible one, that means that are within a certain constant distance $r$ from position $[t_X, t_Y ]$.
 
 
 \subsection{Odometry and sensors noise}
