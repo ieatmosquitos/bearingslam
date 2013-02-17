@@ -1,2 +1,51 @@
 \chapter{Conclusions}\label{cap:Conclusions}
+We want to give the reader some kind of perception about the feedback from this experiment, and suggest future possible improvements.
 
+\section{Results}
+To have a perception of how much every step of the algorithm influences the outcome, we will concentrate on a particular trajectory file, and will add ``pieces'' of the algorithm time by time.
+
+First thing first, have a look at figure \ref{fig:corridor_truth}.
+In this image, we show the data association that the algorithm performs when running on the ``real'' version of the data (no noise affects odometry and bearing measurements).
+In the simulation, there actually was one more landmark, but the important fact is that the algorithm didn't compute wrong associations.
+
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[width=0.3\textwidth]{images/corridor/corridor_truth.png}
+  \caption{Trajectory 1 - algorithm run on the ``true'' data values.}
+  \label{fig:corridor_truth}
+\end{figure}
+
+Ideally, the algorithm should manage to obtain the same map analyzing the noised data.
+It's obviously not possible, but we will show how it gets close to the solution. 
+
+Figure \ref{fig:corridor_nooptim} shows the map output of the program when running on the noised data, with optimization inhibition. This means that the odometry guess is taken ``as it is'', and landmark positions are the results of measurements tracking given the robot positions. The solution is evidently ``far'' from the real one.
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[width=0.3\textwidth]{images/corridor/corridor_nooptim.png}
+  \caption{Trajectory 1 - algorithm run on noised data. No optimization is performed.}
+  \label{fig:corridor_nooptim}
+\end{figure}
+
+Letting the algorithm perform optimizations (both while running and at the end) leads to the result in figure \ref{fig:corridor_optim}. This is in a certain way ``better'' then the previous one, since the landmarks disposition is tidier, but we still didn't improve the trajectory extimation appreciably.
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[width=0.3\textwidth]{images/corridor/corridor_optim.png}
+  \caption{Trajectory 1 - 30 optimization steps performed every 50 trajectory steps.}
+  \label{fig:corridor_optim}
+\end{figure}
+
+The final step is to perform ``expectation maximization'', that is to rerun the algorithm taking the newly computed robot positions as initial guess. Each algorithm rerunning (usually) brings the found solution closer to the real one. In figure \ref{fig:corridor_em} you can see the result of rerunning the algorithm about 10 times. The trajectory shape has been approximatively rebuilt, and landmarks arrangement is somehow similar to the original one.
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[width=0.3\textwidth]{images/corridor/corridor_rerun10.png}
+  \caption{Trajectory 1 - Map produced after some rerunning of the algorithm.}
+  \label{fig:corridor_em}
+\end{figure}
+
+Figure \ref{fig:corridor2} shows the results on another experiment. In this case, within five rerunning, the algorithm produced a map where the overall rotation had been lost, but the trajectory shape had been reconstructed (note how the robot re-enters inside the corridor after a tour).
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[width=0.9\textwidth]{images/corridor/corridor2.png}
+  \caption{Trajectory 2 - [left, true data] [center, only data association] [right, after 5 rerunning].}
+  \label{fig:corridor2}
+\end{figure}
