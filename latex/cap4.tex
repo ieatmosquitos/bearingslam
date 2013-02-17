@@ -1,5 +1,5 @@
 \chapter{Conclusions}\label{cap:Conclusions}
-We want to give the reader some kind of perception about the feedback from this experiment, and suggest future possible improvements.
+In this chapter, we want to give the reader some kind of perception about the feedback from experiments with our program, and suggest future possible improvements.
 
 \section{Results}
 To have a perception of how much every step of the algorithm influences the outcome, we will concentrate on a particular trajectory file, and will add ``pieces'' of the algorithm time by time.
@@ -42,10 +42,24 @@ The final step is to perform ``expectation maximization'', that is to rerun the 
   \label{fig:corridor_em}
 \end{figure}
 
-Figure \ref{fig:corridor2} shows the results on another experiment. In this case, within five rerunning, the algorithm produced a map where the overall rotation had been lost, but the trajectory shape had been reconstructed (note how the robot re-enters inside the corridor after a tour).
+Figure \ref{fig:corridor2} shows the results on another experiment. In this case, within five rerunning, the algorithm produces a map where the overall rotation has been lost, but the trajectory shape has been reconstructed (note how the robot re-enters inside the corridor after a tour).
 \begin{figure}[htbp]
   \centering
     \includegraphics[width=0.9\textwidth]{images/corridor/corridor2.png}
   \caption{Trajectory 2 - [left, true data] [center, only data association] [right, after 5 rerunning].}
   \label{fig:corridor2}
 \end{figure}
+
+\section{Future developments}
+There are several ideas we got about improvements and future developments about the project:
+\begin{itemize}
+  \item Optimization phases currently consist of a fixed number of optimization. It would be good consider optimizing up to when the ``average transformation'' is below a certain threshold.
+  \item It would be the case of trying different solvers.
+  \item Varying dinamically the number of steps needed to trigger an optimization phase. Contextually, find a convenient way for tuning this number.
+  \item Variate the information matrix associated to each edge, according to some criteria to be defined, for instance on the basis of the ``reliability'' of a landmark.
+  \item Add the ``closure'' check to the workflow of the algorithm.
+  \item Consider using landmarks overlapping to generate new constraints.
+  \item Try the program on data from the real world and examine its performances.
+\end{itemize}
+
+It would be very nice if, including some of these ideas in the project, we would obtain a system for mapping via as few informations as a bearing. Sounds quite a challenge, but even the results we had look pretty encouraging as a starting point.
