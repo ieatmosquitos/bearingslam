@@ -32,4 +32,6 @@ In order to generate a valid trajectory file for this program, you can use my ot
 During the program execution, every pression of the "Enter" key will move the trajectory a step forward.
 Alternatively, you can press the SPACE BAR to let the algorithm run till the end.
 When the association algorithm has reached its end, you can press "R" key to relaunch the algorithm using the poses found as initial guess.
+Pushing the "O" Key will inhibit optimizations.
+"L" and "P" will zoom in/out.
 If you want to try it, you can already find some trajectory file in the "trajectories" directory.
