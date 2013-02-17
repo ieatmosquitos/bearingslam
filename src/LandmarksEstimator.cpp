@@ -34,6 +34,10 @@ bool next_run;	// when true, the algorithm is rerunned with the newly computed p
 bool free_running;	// when true, the algorithm will run up to its end (no need to press a button at every step)
 rdrawer::RobotDrawer * _drawer;	// used for drawing on the screen
 unsigned int next_id;
+g2o::SparseOptimizer * optimizer;	// optimizer declaration
+int optimize_this_much;	// number of optimization steps to be performed every time an optimization phase is triggered
+bool optimization_active;	// determines whether optimizations should be performed or not
+
 //RobotPosition * last_robot_pose;
 Eigen::Matrix3d * odom_info;
 Eigen::MatrixXd * obs_info;
@@ -47,9 +51,6 @@ unsigned int _optimize_every;	// every time this number of step has been perform
 // types definition
 typedef g2o::BlockSolver< g2o::BlockSolverTraits<-1, -1> >  SlamBlockSolver;
 typedef g2o::LinearSolverCSparse<SlamBlockSolver::PoseMatrixType> SlamLinearSolver;
-
-// optimizer declaration
-g2o::SparseOptimizer * optimizer;
 
 void handleEvents(sf::RenderWindow * window){
   sf::Event event;
@@ -73,6 +74,9 @@ void handleEvents(sf::RenderWindow * window){
 	break;
       case sf::Key::R:
 	next_run = true;
+	break;
+      case sf::Key::O:
+	optimization_active = !optimization_active;
 	break;
       case sf::Key::Escape:
 	exit(0);
@@ -360,6 +364,9 @@ void init(){
   
   // creating the drawer
   _drawer = new rdrawer::RobotDrawer();
+  
+  optimize_this_much = 30;
+  optimization_active = true;
 }
 
 void posesToTransformations(std::vector<RobotPosition*> *poses, std::vector<RobotPosition*> *transformations){
@@ -590,7 +597,7 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition
     }
     buffswitch = !buffswitch;
     
-    if(loop_iterations > _optimize_every){	// time to optimize
+    if(loop_iterations > _optimize_every && optimization_active){	// time to optimize
       std::cout << "time to optimize" << std::endl;
       loop_iterations = 0;
       
@@ -607,7 +614,8 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition
       
       populateGraph(poses, transformations, landmarks);
       
-      optimizer->optimize(30);
+      optimizer->optimize(optimize_this_much);
+      
     }
     
     std::cout << "creating image...\n";
@@ -636,7 +644,10 @@ void runAlgorithm(std::vector<RobotPosition*> * poses, std::vector<RobotPosition
   deleteUnconfirmedLandmarks(landmarks, &buff1);
   
   populateGraph(poses, transformations, landmarks);
-  optimizer->optimize(30);
+  
+  if(optimization_active){
+    optimizer->optimize(optimize_this_much);
+  }
   
   printState(landmarks, poses);
   _drawer->draw();
