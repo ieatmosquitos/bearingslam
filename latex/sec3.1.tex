@@ -6,8 +6,8 @@ and the noised configurations sequences. Gaussian noise is added in order to con
 like wheels slippage or sensor noise.\\
 The simulator produces as output a text file where is associated a sequence of robot's states and the landmarks perception from these states.
 
-\subsection{Representation of the configuration}
-A robot configuration $C$ is rapresented by the mean of a 2D homogeneous matrix (at the $k-th$ simulator iteration):
+\subsection{Configuration representation}
+A robot configuration $C$ is represented by the mean of a 2D homogeneous matrix (at the $k-th$ simulator iteration):
 
 \[ 
 \textbf{C}(k) = 
@@ -17,7 +17,7 @@ A robot configuration $C$ is rapresented by the mean of a 2D homogeneous matrix 
 \end{array} \right)
 \]
 with $\textbf{t} = [x,y]^T$.\\
-The matrix also rapresents univocally a certain state of the robot $[x,y,\theta]$.
+The matrix also represents univocally a certain state of the robot $[x,y,\theta]$.
 \\
 The robot model used is a planar unicycle, with two control inputs (linear and angular velocity) controllable by human user.
 The robot is equipped with a sensor capable of returning the bearing of all landmarks within a certain distance $r$.\\
@@ -46,11 +46,11 @@ Given a certain configuration $\textbf{C}$(\textit{k}) and the two instantaneous
 \end{array} \right)
 \]\\
 
-This model is equivalent to the unicycle in [1] (cita libro robotica).
+This model is equivalent to the unicycle in ``Robotics, modelling, planning and control'' ([Siciliano, Sciavicco, Villani, Oriolo], 2008).
 Note that the integration method used for an ideal unicycle is the \textit{approximated Euler}, since we are considering that the $\theta$ remains constant during the integration step,
 and changes suddenly at the next step (instead of changing continuously as it would be in reality).\\
 \subsection{Configurations storing}
-The \textit{distance} $d$ between two configuration matrices $M_1$, $M_2$ rapresenting respectively states $~ s1 = [x_1,y_1,\theta_1]$,$~ s2 = [x_2,y_2,\theta_2]~$
+The \textit{distance} $d$ between two configuration matrices $M_1$, $M_2$ representing respectively states $~ s1 = [x_1,y_1,\theta_1]$,$~ s2 = [x_2,y_2,\theta_2]~$
 is defined as
 \[ 
 d = \alpha \cdot d_{\theta} + d_p
@@ -60,13 +60,13 @@ and $d_p$ is the norm of the vector $[x_1 - x_2,y_1 - y_2]^T$.\\
 The parameter $\alpha$, usually bigger than $1$, balances the importance of the rotation component respect the linear one.\\
 While user navigation proceeds the simulator stores in two separete lists (real and noised) the subsequent configurations $\textbf{C}$.
 At a certain iteration, both current noised and real configurations are appended to their lists if and only if the \textit{distance} between the current noised configuration 
-and the last saved noised configuration exceeds a certain threeshold (this models an on-board robot software that can dispose only of the noised perceptions).\\
+and the last saved noised configuration exceeds a certain threshold (this models an on-board robot software that can dispose only of the noised perceptions).\\
 %%These two list are used to provide the user in real time the comparison between real and noised configurations.
 \\
 \begin{figure}[htbp]
   \centering
     \includegraphics[width=0.8\textwidth]{images/matlab_simulator.png}
-  \caption{GUI rapresents both real (red) and noised (blue) configuration sequences.}
+  \caption{GUI represents both real (red) and noised (blue) configuration sequences.}
   \label{fig:matlab_simulator}
 \end{figure}
 
@@ -92,6 +92,6 @@ The n landmarks are the perceptible one, that means that are within a certain co
 \subsection{Odometry and sensors noise}
 The error on the odometry is modeled as a zero-centered white noise with gaussian distribution, that influences independently the two velocities $v$ and $\theta$.
 The standard deviation of the distribution has a constant component and an additional component that is directly proportional to the norm of velocity $v$ or $\theta$.
-In this way is modelled the fact that usually in reality we tends to have higher odometric error with higher robot wheels velocities.
+This models the fact that in reality we usually tend to have higher odometric errors with higher robot wheels velocities.
 \\
 The error on the bearing sensor is modelled as a zero-centered white noise with gaussian distribution, that is directly summed to the bearing readings.\\
