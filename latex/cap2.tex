@@ -15,7 +15,7 @@ When, on the contrary, no new observations are associated to the track, it is no
 
 Going on with the trajectory, the algorithm creates a graph, putting in it new poses and landmarks.
 
-Every time a certain number of steps has been performed, the graph is optimized according to the edges created up to now.
+Every time a certain number of steps has been performed, the graph is optimized according to the edges created up to that moment.
 
 After the trajectory evaluation is terminated, the optimized poses can be used to re-initialize the algorithm, keeping the bearing measurements unchanged, so to re-associate the data. This is known as \textit{Expectation Maximization}.
 
@@ -72,13 +72,12 @@ We now face the dual problem: it can happen that two of the current observations
 
 Just like before, we cannot risk to associate a landmark with wrong measurements.
 Moreover, it is obvious that a single landmark shouldn't generate two measurements.
-Following the idea that not knowing is better than thinking wrong, we don't add either of the two observation to the track.
+Following the idea that not knowing is better than thinking wrong, we don't add either of the two observations to the track.
 Anyway, if the landmark had been \textit{confirmed} (I.E. it is considered reliable), its corresponding track  is propagated to the next trajectory step.
 
 \subsection{Further robustness}
 Even with the precautions explained in sections \ref{subsec:twotracks} and \ref{subsec:twoobservations}, it can still happen that a wrong association is generated. In order to deal with this problem, the effect of edges in the optimization steps is limited via the use of the so called \textit{robust kernels}.
 These are filters that impose a saturation threshold, over which the constraint effect can't grow anymore.
-In chapter \ref{cap:Conclusions} we will see how this can enhance the results quality.
 
 \section{Pseudo-code}\label{sec:pseudocode}
 In this section, a pseudo-code for the algorithm is given.

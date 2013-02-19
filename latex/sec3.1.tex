@@ -1,10 +1,10 @@
 \section{Simulator in Matlab}\label{sec:matlab_simulator}
 
-This Matlab landmark sensing simulator was realized in order to generate a sequence of observations subjected to noise to be provided at the SLAM.
+This Matlab landmark sensing simulator was realized in order to generate a sequence of observations subjected to noise to be provided to the data association algorithm.
 The simulator provides a GUI that allows the user to navigate in a map filled with randomly-placed landmarks, and visualize in real-time both the real 
 and the noised configurations sequences. Gaussian noise is added in order to consider the uncertainties on robot perceptions originated from physical process
 like wheels slippage or sensor noise.\\
-The simulator produces as output a text file where is associated a sequence of robot's states and the landmarks perception from these states.
+The simulator produces as output a text file where a sequence of robot states is associated with the landmarks perceptions from these states.
 
 \subsection{Configuration representation}
 A robot configuration $C$ is represented by the mean of a 2D homogeneous matrix (at the $k-th$ simulator iteration):
@@ -22,7 +22,7 @@ The matrix also represents univocally a certain state of the robot $[x,y,\theta]
 The robot model used is a planar unicycle, with two control inputs (linear and angular velocity) controllable by human user.
 The robot is equipped with a sensor capable of returning the bearing of all landmarks within a certain distance $r$.\\
 The instantaneous linear velocity $v \in \mathbb{R}$ is directed in the $x$ (sagittal) axis of the robot, while angular velocity $\theta \in \mathbb{R}$ is
-around the $z$ axis of the workspace (orthogonal to the plane). Of course this values are intended to be deduced from the encorders on the wheels.\\
+around the $z$ axis of the workspace (orthogonal to the plane). Of course this values are intended to be deducted from the encorders on the wheels.\\
 Given a certain configuration $\textbf{C}$(\textit{k}) and the two instantaneous velocities $v$ and $\theta$, the configuration at the next iteration is computed as:\\
 \vspace{1 cm}
 \[ 
@@ -57,7 +57,7 @@ d = \alpha \cdot d_{\theta} + d_p
 \]
 where $d_{\theta}$ is the absolute value of the the (circular) distance between angles $\theta_1$,$\theta_2$,
 and $d_p$ is the norm of the vector $[x_1 - x_2,y_1 - y_2]^T$.\\
-The parameter $\alpha$, usually bigger than $1$, balances the importance of the rotation component respect the linear one.\\
+The parameter $\alpha$, usually bigger than $1$, balances the importance of the rotation component with respect to the linear one.\\
 While user navigation proceeds the simulator stores in two separete lists (real and noised) the subsequent configurations $\textbf{C}$.
 At a certain iteration, both current noised and real configurations are appended to their lists if and only if the \textit{distance} between the current noised configuration 
 and the last saved noised configuration exceeds a certain threshold (this models an on-board robot software that can dispose only of the noised perceptions).\\
@@ -86,7 +86,7 @@ where:
 \textit{$ID$} is the identificative number of the reading, $[n_X, n_Y, n_{\theta}]$ is the noised state of the robot, $[t_X, t_Y, t_{\theta}]$ the real one.
 The $n$ values $ b_1 ... b_n$ gives the bearing angle of the $n$ landmarks visible from $[t_X, t_Y, t_{\theta}]$. The $i-th$ bearing value is then associated to 
 the relative landmark's identificative number $IDb_i$.
-The n landmarks are the perceptible one, that means that are within a certain constant distance $r$ from position $[t_X, t_Y ]$.
+The n landmarks are the perceptible ones, that means that they are within a certain constant distance $r$ from position $[t_X, t_Y ]$.
 
 
 \subsection{Odometry and sensors noise}
